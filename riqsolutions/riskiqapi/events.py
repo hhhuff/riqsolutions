@@ -9,15 +9,15 @@ class Events(RiskIQAPI):
             url_prefix='v1/event', 
             hostname='ws.riskiq.net')
 
-    def get_searchFields(self, **kwargs):
+    def get_searchFields(self):
         r = self.get('search/filters')
         return r.json()
 
-    def get_savedSearches(self, **kwargs):
+    def get_savedSearches(self):
         r = self.get('savedsearches')
         return r.json()
     
-    def get_event(self, **kwargs):
+    def get_event(self, eventId=None, snapshot=None, classifier=None, includeUserNotes=None):
         """
         # https://sf.riskiq.net/crawlview/api/docs/controllers/LandingPageController.html#get
         # eventId: required
@@ -26,22 +26,15 @@ class Events(RiskIQAPI):
         # includeUserNotes: optional (default: False) notes created by a user added to the response
         """
         reqs = ''
-        if kwargs.get('eventId') == None:
+        if eventId is None:
             reqs += ' ** eventId required'
         if reqs != '':
             raise ValueError(reqs)
 
-        if kwargs.get('snapshot') != None:
-            this_get = False
-        if kwargs.get('classifier') != None:
-            this_get = False
-        if kwargs.get('includeUserNotes') != None:
-            kwargs['includeUserNotes'] = False
-
         this_params = {
-            'snapshot':kwargs.get('snapshot'),
-            'classifier':kwargs.get('classifier'),
-            'includeUserNotes':kwargs.get('includeUserNotes')
+            'snapshot':snapshot,
+            'classifier':classifier,
+            'includeUserNotes':includeUserNotes
         }
 
         r = self.get(eventId, params=this_params)
