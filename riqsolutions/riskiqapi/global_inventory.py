@@ -12,7 +12,7 @@ class GlobalInventory(RiskIQAPI):
             hostname='api.riskiq.net')
     
 
-    def inventory_search(self, query=None, size=100, page=0):
+    def inventory_search(self, query: json=None, size: int=100, page: int=0):
         """
         https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_search
         query: type(json) - required
@@ -29,23 +29,23 @@ class GlobalInventory(RiskIQAPI):
         this_params = {
             'global':False,
             'size':size,
-            'page':page
+            'mark':'*'
         }
         r = self.post('search', payload=query, params=this_params)
         return {'results':r}
 
-    def get_asset_by_id(self, uuid=None, recent=True):
+    def get_asset_by_id(self, uuid: str=None, recent: bool=True):
         """
         https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_id_uuid
         uuid: type(str) - required
         recent: optional (default: True)
         global: type(bool) - optional (default: False) << don't make available?
         """
-        reqs = ''
-        if uuid == None:
-            reqs += ' ** uuid type(str) required'
-        if reqs != '':
-            raise ValueError(reqs)
+        # reqs = ''
+        # if uuid == None:
+        #     reqs += ' ** uuid type(str) required'
+        # if reqs != '':
+        #     raise ValueError(reqs)
 
         this_params = {
             'recent':recent,
@@ -80,6 +80,37 @@ class GlobalInventory(RiskIQAPI):
         }
 
         r = self.get('assets/{}'.format(asset_type), params=this_params)
+        return r.json()
+
+    def get_assets_bulk(self, asset_list: list = None, asset_type=None):
+        """
+        https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_assets_bulk
+        asset_type: type(str) - required
+        asset_list: type(list) - required
+        """
+        reqs = ''
+        if asset_type == None:
+            reqs += ' ** asset_type type(str) required'
+        if asset_list == None:
+            reqs += ' ** asset_list type(list)'
+        if asset_list is not None and type(asset_list) is not list:
+            reqs += ' ** asset_list must be type(list)'
+        if reqs != '':
+            raise ValueError(reqs)
+
+        assets = []
+        for a in asset_list:
+            this_asset = {
+                "name": a,
+                "type": asset_type
+            }
+            assets.append(this_asset)
+        
+        this_payload = {
+            'assets':assets
+        }
+
+        r = self.post('assets/bulk', payload=this_payload)
         return r.json()
 
     def get_asset_attributes(self, asset_name=None, asset_type=None, recent=True, size=100, page=0):
@@ -148,7 +179,7 @@ class GlobalInventory(RiskIQAPI):
             'organization': organization,
             'tag': tag,
             'size':size,
-            'page':page
+            'mark':'*'
         }
 
         r = self.get('deltas',params=this_params)
@@ -288,12 +319,16 @@ class GlobalInventory(RiskIQAPI):
 
         asset_list = []
         if type(asset_name) == list:
-            for n in asset_name:
-                this_n = {
-                    'name':n,
-                    'type':asset_type.upper()
-                }
-                asset_list.append(this_n)
+            if len(asset_name) < 1000:
+                for n in asset_name:
+                    this_n = {
+                        'name':n,
+                        'type':asset_type.upper()
+                    }
+                    asset_list.append(this_n)
+            else:
+                bulk_submit_results = bulk_submit(self, payload=asset_name, params=this_params,action=action, asset_type=asset_type, update_type=update_type, update_value=update_value)
+                return bulk_submit_results
         else:
             asset_list = [{
                 'name':asset_name,
@@ -307,9 +342,37 @@ class GlobalInventory(RiskIQAPI):
                     'value': update_value,
                     'action': action.upper()
                 }]}
-        print(this_payload)
         r = self.post('update', payload=this_payload, params=this_params)
-        return {'results':r.text}
+        return r.json()
+
+def bulk_submit(self, payload=None, params=None, action=None, asset_name=None, asset_type=None, update_type=None, update_value=None, failOnError=False):
+    count = 0
+    bundle_size = 1000
+    total_results = []
+    bundle_submit = []
+    for index in range(len(payload)): 
+        count += 1
+        if count >= 1000 or index+1 == len(payload):
+            count = 0
+            this_payload = {
+                'assets': bundle_submit,
+                'properties': [{
+                        'name': update_type, 
+                        'value': update_value,
+                        'action': action.upper()
+                    }]}
+            r = self.post('update', payload=this_payload, params=params)
+            total_results.append(r.json())
+            del bundle_submit[:]
+        else:
+            submit_n = {
+                'name':payload[index],
+                'type':asset_type.upper()
+            }
+            bundle_submit.append(submit_n)
+
+    return total_results
+
 
 def get_asset_dataset(self, this_dataset, asset_name=None, asset_type=None, recent=True, size=100, page=0):
         """     
@@ -333,7 +396,7 @@ def get_asset_dataset(self, this_dataset, asset_name=None, asset_type=None, rece
             'name':asset_name,
             'global':False,
             'size':size,
-            'page':page
+            'mark':'*'
         }
         r = self.get('assets/{0}/{1}'.format(asset_type, this_dataset), params=this_params)
         return r
