@@ -43,18 +43,12 @@ class RiskIQAPI():
             if params is not None and 'mark' in params.keys():
                 params['mark'] = this_mark
             url = 'https://{0._hostname}/{0._prefix}/{1}'.format(self, endpoint)
-            print(url)
-            print(method)
-            print(params)
-            print(payload)
             creds = (self._token, self._key)
             if method == "DELETE":
                 req = requests.delete(url, auth=creds, params=params, json=payload)
             else:
                 req = self._session.request(method, url, auth=creds, params=params, json=payload)
-            print(req)
-            if req.status_code != 200:
-                print(req.content)
+            
             if req.status_code == 200:
                 if method == "DELETE":
                     return req
