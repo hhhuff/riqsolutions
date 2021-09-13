@@ -1,28 +1,38 @@
+"""Global Inventory Module for the RiskIQ Solutions Python API Library"""
+
 from .riskiqapi import RiskIQAPI
 import json
 
 ASSET_TYPES = ['DOMAIN', 'HOST', 'PAGE', 'IP_BLOCK', 'IP_ADDRESS', 'CONTACT', 'SSL_CERT', 'AS']
 
 class GlobalInventory(RiskIQAPI):
-    def __init__(self, api_token=None, api_key=None):
+    """
+    Represents a Global Inventory Asset (or list of Assets)
+    """
+    def __init__(self, api_token=None, api_key=None, proxy=None, context=None):
         super().__init__(
             api_token, 
             api_key, 
+            proxy,
+            context,
             url_prefix='v1/globalinventory', 
             hostname='api.riskiq.net')
     
 
     def inventory_search(self, query: json=None, size: int=100, page: int=0):
         """
+        Submit json which was generated from the UI to retrieve results through the API. 
         https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_search
-        query: type(json) - required
-        global: type(bool) - optional (default: False) << don't make available?
-        size: type(int) - optional (default: 100)
-        page: type(int) - optional (default: 0)
+        :param query: type json
+        :param global: type bool, optional
+        :param size: type int), optional
+        :param page: type int), optional
+
+        :returns: {'results':r}
         """
         reqs = ''
         if query == None:
-            reqs += ' ** a query type(dict) is required'
+            reqs += ' ** a query type dict) is required'
         if reqs != '':
             raise ValueError(reqs)
 
@@ -36,14 +46,15 @@ class GlobalInventory(RiskIQAPI):
 
     def get_asset_by_id(self, uuid: str=None, recent: bool=True):
         """
+        Submit the UUID of an asset to retrieve its record
         https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_id_uuid
-        uuid: type(str) - required
-        recent: optional (default: True)
-        global: type(bool) - optional (default: False) << don't make available?
+        :param uuid: type str
+        :param recent: type bool, optional
+        :param global: type bool, optional
         """
         # reqs = ''
         # if uuid == None:
-        #     reqs += ' ** uuid type(str) required'
+        #     reqs += ' ** uuid type str required'
         # if reqs != '':
         #     raise ValueError(reqs)
 
@@ -58,17 +69,17 @@ class GlobalInventory(RiskIQAPI):
     def get_asset(self, asset_name=None, asset_type=None, recent=True, size=100):
         """
         https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type
-        asset_type: type(str) - required
-        asset_name: type(str) - required
-        recent: optional (default: True)
-        global: type(bool) - optional (default: False) << don't make available?
-        size: optional (default: 100)
+        :param asset_type: type str
+        :param asset_name: type str
+        :param recent: type bool, optional
+        :param global: type bool, optional 
+        :param size: type int, optional
         """
         reqs = ''
         if asset_type == None:
-            reqs += ' ** asset_type type(str) required'
+            reqs += ' ** asset_type type str required'
         if asset_name == None:
-            reqs += ' ** asset_name type(str)'
+            reqs += ' ** asset_name type str'
         if reqs != '':
             raise ValueError(reqs)
 
@@ -82,33 +93,37 @@ class GlobalInventory(RiskIQAPI):
         r = self.get('assets/{}'.format(asset_type), params=this_params)
         return r.json()
 
-    def get_assets_bulk(self, asset_list: list = None, asset_type=None):
+    def get_assets_bulk(self, asset_list:None, asset_type=None):
         """
         https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_assets_bulk
-        asset_type: type(str) - required
-        asset_list: type(list) - required
+        :param asset_type: type str
+        :param asset_list: type list
         """
         reqs = ''
         if asset_type == None:
-            reqs += ' ** asset_type type(str) required'
+            reqs += ' ** asset_type type str required'
         if asset_list == None:
-            reqs += ' ** asset_list type(list)'
+            reqs += ' ** asset_list type list'
         if asset_list is not None and type(asset_list) is not list:
-            reqs += ' ** asset_list must be type(list)'
+            reqs += ' ** asset_list must be type list'
         if reqs != '':
             raise ValueError(reqs)
 
-        assets = []
-        for a in asset_list:
-            this_asset = {
-                "name": a,
-                "type": asset_type
+        if len(asset_list) < 100:
+            assets = []
+            for a in asset_list:
+                this_asset = {
+                    "name": a,
+                    "type": asset_type
+                }
+                assets.append(this_asset)
+            
+            this_payload = {
+                'assets':assets
             }
-            assets.append(this_asset)
-        
-        this_payload = {
-            'assets':assets
-        }
+        else:
+            r = bulk_get(self, payload=asset_list, asset_type=asset_type)
+            return r
 
         r = self.post('assets/bulk', payload=this_payload)
         return r.json()
@@ -145,26 +160,26 @@ class GlobalInventory(RiskIQAPI):
     def get_asset_deltas(self, asset_type=None, date=None, delta_range=1, measure='ADDED', brand=None, organization=None, tag=None, size=100, page=0):
         """     
         https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_deltas
-        asset_type: type(str) - required
-        date: type(str) - required
-        delta_range: type(int) optional - Supported ranges are 1, 7 and 30 days (default: 1)
-        measure: type(str) - required - must be 'ADDED' or 'REMOVED' - default: ADDED
-        brand: type(str) - optional
-        organization: type(str) - optional
-        tag: type(str) - optional
-        size: optional (default: 100)
-        page: optional (default: 0)
+        :param asset_type: type str
+        :param date: type str
+        :param delta_range: type int, optional
+        :param measure: type str
+        :param brand: type str, optional
+        :param organization: type str, optional
+        :param tag: type str, optional
+        :param size: type int, optional
+        :param page: type int, optional
         """
 
         reqs = ''
         if asset_type == None:
-            reqs += ' ** asset_type type(str) required'
+            reqs += ' ** asset_type type str required'
         if date == None:
-            reqs += ' ** date type(str) required (YYYY-MM-DD)'
+            reqs += ' ** date type str required (YYYY-MM-DD)'
         if measure == None:
-            reqs += ' ** measure type(str) required - must be ADDED or REMOVED'
+            reqs += ' ** measure type str required, must be ADDED or REMOVED'
         if delta_range != None and type(delta_range) != int:
-            reqs += ' ** delta_range must be type(int) '
+            reqs += ' ** delta_range must be type int) '
         if delta_range != None and delta_range not in [1,7,10]:
             reqs += ' ** delta_range must be 1, 7, or 10'
         if reqs != '':
@@ -189,18 +204,18 @@ class GlobalInventory(RiskIQAPI):
     def get_asset_deltas_summary(self, date=None, delta_range=1, brand=None, organization=None, tag=None, size=100, page=0):
         """     
         https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_deltas_summary
-        date: type(str) - required
-        delta_range: type(int) optional - Supported ranges are 1, 7 and 30 days (default: 1)
-        brand: type(str) - optional
-        organization: type(str) - optional
-        tag: type(str) - optional
+        :param date: type str
+        :param delta_range:  type int, optional
+        :param brand: type str, optional
+        :param organization: type str, optional
+        :param tag: type str, optional
         """
 
         reqs = ''
         if date == None:
-            reqs += ' ** date type(str) required (YYYY-MM-DD)'
+            reqs += ' ** date type str required (YYYY-MM-DD)'
         if delta_range != None and type(delta_range) != int:
-            reqs += ' ** delta_range must be type(int) '
+            reqs += ' ** delta_range must be type int) '
         if delta_range != None and delta_range not in [1,7,10]:
             reqs += ' ** delta_range must be 1, 7, or 10'
         if reqs != '':
@@ -219,13 +234,16 @@ class GlobalInventory(RiskIQAPI):
 
 
     def get_tasks(self):
-        # https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_tasks
-
+        """
+        https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_tasks
+        """
         r = self.get('tasks')
         return r.json()
 
     def get_task(self, taskid=None):
-        # https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_tasks
+        """
+        https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_tasks
+        """
         reqs = ''
         if taskid == None:
             reqs += '  ** taskid required'
@@ -237,33 +255,42 @@ class GlobalInventory(RiskIQAPI):
         
 
     def get_tags(self):
-        # https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_tags
+        """
+        https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_tags
+        """
         r = self.get('tags')
         return r.json()
 
     def get_brands(self):
-        # https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_brands
+        """
+        https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_brands
+        """
         r = self.get('brands')
         return r.json()
 
     def get_organizations(self):
+        """
         # https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_organizations
+        """
         r = self.get('organizations')
         return r.json()
 
 
     def add_asset(self, asset_name=None, asset_type=None):
+        """
         # https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_assets_add
-        asset_type
+        :param asset_name: type str
+        :param asset_type: type str
+        """
         reqs = ''
         if asset_type == None:
             reqs += ' ** asset_type required [Host, IPAddress, Page, or Domain]'
         if asset_type != None and asset_type not in ASSET_TYPES:
             reqs += ' ** asset_type must be one of [Host, IPAddress, Page, or Domain]'
         if asset_name == None:
-            reqs += ' ** asset_name required (Can be type(str) or type(list))'
+            reqs += ' ** asset_name required (Can be type str or type list))'
         if asset_type is not None and type(asset_name) != str and type(asset_name) != list:
-            reqs += ' ** asset_name must be be type(str) or type(list)'
+            reqs += ' ** asset_name must be be type str or type list'
 
         asset_list = []
         if type(asset_name) == list:
@@ -292,7 +319,14 @@ class GlobalInventory(RiskIQAPI):
 
 
     def update_asset(self, action=None, asset_name=None, asset_type=None, update_type=None, update_value=None, failOnError=False):
+        """
         # https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_update
+        :param asset_name: type str
+        :param asset_type: type str
+        :param update_type: type str
+        :param update_value: type str
+        :param failOnError: type bool, optional 
+        """
         reqs = ''
         if action == None:
             reqs += '  ** action required (must be add or remove)'
@@ -301,9 +335,9 @@ class GlobalInventory(RiskIQAPI):
         if asset_type == None:
             reqs += ' ** asset_type required'
         if asset_name == None:
-            reqs += ' ** asset_name required (Can be type(str) or type(list))'
+            reqs += ' ** asset_name required (Can be type str or type list))'
         if asset_type is not None and type(asset_name) != str and type(asset_name) != list:
-            reqs += ' ** asset_name must be be type(str) or type(list)'
+            reqs += ' ** asset_name must be be type str or type list'
         if update_type == None:
             reqs += ' ** update_type required (tag, brand, or organization)'
         if update_type is not None and update_type not in ['tag','brand','organization']:
@@ -327,7 +361,7 @@ class GlobalInventory(RiskIQAPI):
                     }
                     asset_list.append(this_n)
             else:
-                bulk_submit_results = bulk_submit(self, payload=asset_name, params=this_params,action=action, asset_type=asset_type, update_type=update_type, update_value=update_value)
+                bulk_submit_results = bulk_update(self, payload=asset_name, params=this_params,action=action, asset_type=asset_type, update_type=update_type, update_value=update_value)
                 return bulk_submit_results
         else:
             asset_list = [{
@@ -345,7 +379,32 @@ class GlobalInventory(RiskIQAPI):
         r = self.post('update', payload=this_payload, params=this_params)
         return r.json()
 
-def bulk_submit(self, payload=None, params=None, action=None, asset_name=None, asset_type=None, update_type=None, update_value=None, failOnError=False):
+def bulk_get(self, payload=None, params=None, asset_type=None):
+    count = 0
+    bundle_size = 100
+    total_results = []
+    bundle_submit = []
+    for index in range(len(payload)): 
+        count += 1
+        if count >= bundle_size or index+1 == len(payload):
+            count = 0
+            this_payload = {
+                'assets': bundle_submit
+                }
+            r = self.post('assets/bulk', payload=this_payload, params=params)
+            total_results.append(r.json())
+            del bundle_submit[:]
+        else:
+            submit_n = {
+                'name':payload[index],
+                'type':asset_type.upper()
+            }
+            bundle_submit.append(submit_n)
+
+    return total_results
+
+
+def bulk_update(self, payload=None, params=None, action=None, asset_name=None, asset_type=None, update_type=None, update_value=None, failOnError=False):
     count = 0
     bundle_size = 1000
     total_results = []
@@ -374,21 +433,22 @@ def bulk_submit(self, payload=None, params=None, action=None, asset_name=None, a
     return total_results
 
 
+
 def get_asset_dataset(self, this_dataset, asset_name=None, asset_type=None, recent=True, size=100, page=0):
-        """     
-        https://api.riskiq.net/api/globalinventory/
-        asset_type: type(str) - required
-        asset_name: type(str) - required
-        global: optional (default: False)
-        size: optional (default: 100)
-        page: optional (default: 0)
-        """
+        # """     
+        # https://api.riskiq.net/api/globalinventory/
+        # asset_type: type str
+        # asset_name: type str
+        # global: optional (default: False)
+        # size: optional (default: 100)
+        # page: optional (default: 0)
+        # """
 
         reqs = ''
         if asset_type == None:
-            reqs += ' ** asset_type type(str) required'
+            reqs += ' ** asset_type type str required'
         if asset_name == None:
-            reqs += ' ** asset_namee type(str) required'
+            reqs += ' ** asset_namee type str required'
         if reqs != '':
             raise ValueError(reqs)
 
