@@ -3,5 +3,5 @@ chardet==4.0.0
 idna==2.10
 requests==2.25.1
 urllib3==1.26.3
-lxml
-xmltodict
+lxml==4.6.3
+xmltodict==0.12.0

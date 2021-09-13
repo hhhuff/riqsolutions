@@ -32,7 +32,11 @@ source venv/bin/activate
 ### Install the toolkit with pip
 We will use the standard Python package manager, pip, to install the toolkit into our virtual environment.
 ```
-python3 -m pip install git+ssh://git@github.com/RiskIQ/riqsolutions@main#egg=riqsolutions
+python3 -m pip install git+ssh://git@github.com/philcowger/riqsolutions@main#egg=riqsolutions
+```
+Or download the toolkit source: https://github.com/philcowger/riqsolutions/archive/refs/heads/master.zip and install from the local location
+```
+pip install /your/local/location/riqsolutions
 ```
 
 ## Usage
