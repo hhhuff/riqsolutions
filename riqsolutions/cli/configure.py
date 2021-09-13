@@ -1,10 +1,11 @@
+__version__ = '0.5.0'
+
 from os.path import expanduser, join, exists
 import configparser
-from getpass import getpass
+from getpass import getpass, getuser
 
 
 CONFIGFILE_DEFAULT_NAME = '.riqconfig'
-
 
 
 def add_subparser(subparsers):
@@ -16,6 +17,10 @@ def add_subparser(subparsers):
     parser.add_argument('--api_key',
         default=None,
         help='API private key (optional; will prompt if not provided'
+    )
+    parser.add_argument('--proxy',
+        default=None,
+        help='Proxy to be used for http requests'
     )
     parser.add_argument('--context', 
         default='DEFAULT',
@@ -51,12 +56,25 @@ def main(args):
     if api_token == '' or api_key == '':
         print('ERROR: api_token and api_key are both required to complete configuration')
         return 1
+    
+    if not args.proxy:
+        proxy = getuser(' (optional) Proxy: ')
+    else:
+        proxy = args.proxy
+    
+    if not args.context:
+        context = 'DEFAULT'
+    else:
+        context = args.context
+
     config = configparser.ConfigParser()
     if exists(filepath) and args.update:
         config.read(filepath)
     config[args.context] = {
         'api_token': api_token,
-        'api_key': api_key
+        'api_key': api_key,
+        'proxy': proxy,
+        'context': context
     }
     try:
         with open(filepath, 'w') as configfile:
