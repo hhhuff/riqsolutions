@@ -23,6 +23,7 @@ class GlobalInventory(RiskIQAPI):
         """
         Submit json which was generated from the UI to retrieve results through the API. 
         https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_search
+
         :param query: type json
         :param global: type bool, optional
         :param size: type int), optional
@@ -48,6 +49,7 @@ class GlobalInventory(RiskIQAPI):
         """
         Submit the UUID of an asset to retrieve its record
         https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_id_uuid
+
         :param uuid: type str
         :param recent: type bool, optional
         :param global: type bool, optional
@@ -69,6 +71,7 @@ class GlobalInventory(RiskIQAPI):
     def get_asset(self, asset_name=None, asset_type=None, recent=True, size=100):
         """
         https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type
+
         :param asset_type: type str
         :param asset_name: type str
         :param recent: type bool, optional
@@ -96,6 +99,7 @@ class GlobalInventory(RiskIQAPI):
     def get_assets_bulk(self, asset_list:None, asset_type=None):
         """
         https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_assets_bulk
+
         :param asset_type: type str
         :param asset_list: type list
         """
@@ -160,6 +164,7 @@ class GlobalInventory(RiskIQAPI):
     def get_asset_deltas(self, asset_type=None, date=None, delta_range=1, measure='ADDED', brand=None, organization=None, tag=None, size=100, page=0):
         """     
         https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_deltas
+
         :param asset_type: type str
         :param date: type str
         :param delta_range: type int, optional
@@ -204,6 +209,7 @@ class GlobalInventory(RiskIQAPI):
     def get_asset_deltas_summary(self, date=None, delta_range=1, brand=None, organization=None, tag=None, size=100, page=0):
         """     
         https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_deltas_summary
+        
         :param date: type str
         :param delta_range:  type int, optional
         :param brand: type str, optional
@@ -279,6 +285,7 @@ class GlobalInventory(RiskIQAPI):
     def add_asset(self, asset_name=None, asset_type=None):
         """
         # https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_assets_add
+
         :param asset_name: type str
         :param asset_type: type str
         """
@@ -321,6 +328,7 @@ class GlobalInventory(RiskIQAPI):
     def update_asset(self, action=None, asset_name=None, asset_type=None, update_type=None, update_value=None, failOnError=False):
         """
         # https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_update
+        
         :param asset_name: type str
         :param asset_type: type str
         :param update_type: type str
