@@ -1,8 +1,11 @@
 from .riskiqapi import RiskIQAPI
 
+_ACTION_ = {'add':'ADD','remove':'REMOVE'}
 _ALEXA_ = {'notinalexa':'NotRanked','top 100k':'Bucket1','top 10k':'Bucket0'}
+_COLORS_ = {'yellow':'yellow', 'green':'green', 'orange':'orange', 'red':'red', 'purple':'purple', 'green-2':'green-2', 'dark-gray':'dark-grey', 'blue':'blue', 'black':'black', 'white':'white', 'indigo':'indigo', 'gray':'gray'}
 _CONFIDENCE_ = {'absolute':'ABSOLUTE','high':'HIGH','low':'LOW','medium':'MEDIUM','unknown':'UNKNOWN','unlikely':'UNLIKELY'}
 _DOMAINEXPIRATION_ = {'expired':'Expired','expires in 30 days':'Expires30','expires in 60 days':'Expires60','expires in 90 days':'Expires90','expires in > 90 days':'ExpiresAfter90'}
+_ENTERPRISE_ = {'true':True,'false':False}
 _PORTLASTSEEN_ = {'7 days':7,'14 days':14,'30 days':30,'7days':7,'14days':14,'30days':30,7:7,14:14,30:30}
 _PORTSTATE_ = {'filtered':'Filtered','open':'Open'}
 _PRIORITY_ = {'high':'HIGH','low':'LOW','medium':'MEDIUM','none':'NONE'}
@@ -10,6 +13,7 @@ _REMOVEDSTATE_ = {'archived':'ARCHIVED','dismissed':'DISMISSED'}
 _SSLCERTEXPIRATION_ = {'expired':'Expired','expires in 30 days':'Expires30','expires in 60 days':'Expires60','expires in 90 days':'Expires90','expires in > 90 days':'ExpiresAfter90'}
 _STATE_ = {'approved inventory':'CONFIRMED','confirmed':'CONFIRMED','candidate':'CANDIDATE','dependencies':'ASSOCIATED_THIRDPARTY','monitor only':'ASSOCIATED_PARTNER','requires investigation':'CANDIDATE_INVESTIGATE'}
 _ASSETTYPE_ = {'asn':'AS','contact':'CONTACT','domain':'DOMAIN','host':'HOST','ip address':'IP_ADDRESS','ip block':'IP_BLOCK','mail server':'MAIL_SERVER','name server':'NAME_SERVER','page':'PAGE','resource':'RESOURCE','ssl cert':'SSL_CERT'}
+_UPDATETYPE_ = {'state':'state','status':'state','removedstate':'removedState','priority':'priority','enterprise':'enterprise','tag':'tag','brand':'brand','organization':'organization','primarycontact':'primaryContact','secondarycontact':'secondaryContact','externalid':'externalID','externalmetadata':'externalMetadata','note':'note'}
 _VALIDATIONTYPE_ = {'domain':'DOMAIN_VALIDATION','extended':'EXTENDED_VALIDATION','organization':'ORGANIZATION_VALIDATION'}
 
 class Value(RiskIQAPI):
@@ -22,9 +26,12 @@ class Value(RiskIQAPI):
             context,
             url_prefix='v1/globalinventory', 
             hostname='api.riskiq.net'
-            )  
+            ) 
+        # common 
+        
         self._alexaBucket = None
         self._assetType = None
+        self._color = None
         self._confidence = None
         self._domainExpiration = None
         self._portLastSeen = None
@@ -42,7 +49,16 @@ class Value(RiskIQAPI):
         self._brandList = None
         self._org = None
         self._orgList = None
-
+        # update only
+        self._action = None
+        self._updateType = None
+        self._enterprise = None
+        self._externalID = None
+        self._externalMetadata = None
+        self._note = None
+        self._primaryContact = None
+        self._secondarContact = None
+        
     
     @property
     def tag(self):
@@ -164,6 +180,16 @@ class Value(RiskIQAPI):
         self._value = rando
 
     @property
+    def action(self):
+        return self._action
+
+    @action.setter
+    def action(self, action):
+        if input_validation('action', _ACTION_, action):
+            self._action = value_setter(_ACTION_, action)
+            self._value = value_setter(_ACTION_, action)
+
+    @property
     def alexaBucket(self):
         return self._alexaBucket
 
@@ -183,6 +209,29 @@ class Value(RiskIQAPI):
             this_v = value_setter(_ASSETTYPE_, assetType)
             self._assetType = this_v
             self._value = this_v
+    
+    @property
+    def updateType(self):
+        return self._updateType
+
+    @updateType.setter
+    def updateType(self, updateType):
+        if input_validation('updateType', _UPDATETYPE_, updateType):
+            this_v = value_setter(_UPDATETYPE_, updateType)
+            self._updateType = this_v
+            self._value = this_v
+
+    @property
+    def color(self):
+        return self._color
+
+    @color.setter
+    def color(self, color):
+        if input_validation('color', _COLORS_, color.lower()):
+            this_v = value_setter(_COLORS_, color.lower())
+            self._color = this_v
+            self._value = this_v
+    
 
     @property
     def confidence(self):
@@ -191,7 +240,7 @@ class Value(RiskIQAPI):
     @confidence.setter
     def confidence(self, confidence):
         if input_validation('confidence', _CONFIDENCE_, confidence):
-            this_v = value_setter(_CONFIDENCE_, assetType)
+            this_v = value_setter(_CONFIDENCE_, confidence)
             self._confidence = this_v
             self._value = this_v
             
@@ -283,6 +332,61 @@ class Value(RiskIQAPI):
             self._validationType = this_v
             self._value = this_v
         
+    @property
+    def enterprise(self):
+        return self._enterprise
+    
+    @enterprise.setter
+    def enterprise(self, enterprise):
+        if input_validation('enterprise', _ENTERPRISE_, enterprise):
+            this_v = value_setter(_ENTERPRISE_, enterprise)
+            self._enterprise = this_v
+            self._value = this_v
+    
+    @property
+    def externalID(self):
+        return self._externalID
+    
+    @externalID.setter
+    def externalID(self, externalID):
+        self._externalID = externalID
+        self._value = externalID
+
+    @property
+    def externalMetadata(self):
+        return self._externalID
+    
+    @externalMetadata.setter
+    def externalMetadata(self, externalMetadata):
+        self._externalMetadata = externalMetadata
+        self._value = externalMetadata
+    
+    @property
+    def note(self):
+        return self._note
+
+    @note.setter
+    def note(self, note):
+        self._note = note
+        self._value = note
+
+    @property
+    def primaryContact(self):
+        return self._primaryContact
+
+    @primaryContact.setter
+    def primaryContact(self, primaryContact):
+        self._primaryContact = primaryContact
+        self._value = primaryContact
+
+    @property
+    def secondaryContact(self):
+        return self._secondaryContact
+
+    @secondaryContact.setter
+    def secondaryContact(self, secondaryContact):
+        self._secondaryContact = secondaryContact
+        self._value = secondaryContact
 
     def get_attr(self):
         return []

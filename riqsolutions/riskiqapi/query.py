@@ -6,20 +6,6 @@ from riqsolutions.riskiqapi.values import Value
 from riqsolutions.cli import configure_api
 import json
 
-
-# ALEXA = ['Not in Alexa','Top 100k','Top 10k']
-# CONFIDENCE = ['Absolute','High','Low']
-# DOMAINEXP = ['Expired','Expires in 30 days','Expires in 60 days','Expires in 90 days','Expires in > 90 days']
-# PORTLASTSEEN = ['7 Days','14 Days','30 Days']
-# PORTSTATE = ['Filtered','Open']
-# PRIORITY = ['High','Low	Medium','None']
-# REMOVEDSTATE = ['Archived','Dismissed']
-# SSLCERTEXP = ['Expired','Expires in 30 days','Expires in 60 days','Expires in 90 days','Expires in > 90 days']
-# STATE = ['Approved Inventory','Candidate','Dependencies','Monitor Only','Requires Investigation']
-# _TYPE = ['ASN','Contact','Domain','Host','IP Address','IP Block','Mail Server','Name Server','Page','Resource','SSL Cert']
-# VALIDATIONTYPE = ['Domain','Extended','Organization']
-# FACETS = ['admin','adminEmail','adminOrg','alexaBucket','asnNumber','assetType','attributeType','attributeTypeValue','attributeValue','autoConfirmed','banner','bgpPrefix','brand','city','cname','cnameDomain','confidence','confidence','connected','country','countryCode','createdAt','cvss3BaseScore','cvssScore','cweID','discoveryRun','domainExpiration','domainStatus','email','enterprise','error','externalId','externalMetadata','finalResponseCode','finalScheme','finalUrl','firstSeen','hasMailServerRecord','hasNameServerRecord','ipv4','ipv6','issuerAlternativeName','issuerCommonName','keyAlgorithm','keySize','keystone','lastSeen','name','note','organization','parkedDomain','port','portLastSeen','portState','primaryContact','priority','regionCode','registrant','registrantEmail','registrantOrg','removedFromInventory','removedState','reputationType','resourceHost','resourceMd5','resourceUrl','scheme','secondarContact','securityPolicy','selfSigned','serialNumber','signatureAlgorithm','signatureAlgorithmOid','sslCertExpiration','sslCertIssuerOrganization','sslCertIssuerOrganizationalUnit','sslCertOrganization','sslCertOrganizationalUnit','sslCertSubjectOrganization','sslCertSubjectOrganizationalUnit','state','subjectAlternativeName','subjectCommonName','tag','techEmail','technical','technicalOrg','type','updatedAt','uuid','validationType','webComponentName','webComponentNameVersion','webComponentService','webComponentType','webComponentVersion','wildcard']
-
 class Query(RiskIQAPI):
     def __init__(self, api_token=None, api_key=None, proxy=None, context=None):
         super().__init__(
@@ -30,33 +16,11 @@ class Query(RiskIQAPI):
             url_prefix='v1/globalinventory', 
             hostname='api.riskiq.net'
             )
-    
-        # Facet.__init__()
-        # Comparator.__init__()
-        # Value.__init__()
         self._fullQuery=[]
         self._EC = 0
-        # self._tagList = None
-        # self._brandList = None
-        # self._orgList = None
 
     def get_query(self):
         return self._fullQuery
-    
-    # def get_tags(self):
-    #     if self._tagList == None:
-    #         self._tagList = self.get('tags')
-    #     return self._tagList
-    
-    # def get_brands(self):
-    #     if self._brandList == None:
-    #         self._brandList = self.get('brands')
-    #     return self._brandList
-    
-    # def get_organizations(self):
-    #     if self._orgList == None:
-    #         self._orgList = self.get('organizations')
-    #     return self._orgList
 
     def get_facets(self):
         this_f = Facet()
@@ -67,7 +31,6 @@ class Query(RiskIQAPI):
         return this_f.get_comparators()
 
     def add(self, facet=None, comparator=None, value=None):
-
         this_f = Facet()
         this_f.facet = facet
 
@@ -107,28 +70,6 @@ class Query(RiskIQAPI):
         else:
             this_v.rando = value
         
-
-
-        # if facet == 'tag':
-        #     if self._tagList == None:
-        #         self._tagList = tag_list(self)
-        #     value = check_values(self, 'tag', value)
-
-        # if facet == 'brand':
-        #     if self._brandList == None:
-        #         self._brandList = brand_list()
-        #     value = check_values(self, 'brand', value)
-
-        # if facet == 'organization':
-        #     if self._orgList == None:
-        #         self._orgList = org_list()
-        #     value = check_values(self, 'org', value)
-
-        # if facet == 'alexaBucket':
-        #     this_f = Value()
-        #     this_f.alexaBucket(value)
-
-        
         self._EC += 1
         self._fullQuery.append(
             {'expressionId':self._EC,'operator':'and','facet':this_f.facet,'comparator':this_c.comparator,'value':this_v.value}
@@ -159,24 +100,35 @@ class Query(RiskIQAPI):
                         self._fullQuery.remove(e)
                 
             
-    def run(self, size=1000, page=0, idsOnly=False):
+    def run(self, size=1000, idsOnly=False, threadindex=None):
         """
         https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_search
         query: type(json) - required
         global: type(bool) - optional (default: False) << don't make available?
-        size: type(int) - optional (default: 100)
-        page: type(int) - optional (default: 0)
+        size: type(int) - optional (default: 1000)
         idsOnly: type(bool) - optional (default: False)
         """
         this_payload = process_query_object(self)
-        this_params = {
-            'global':False,
-            'size':size,
-            'mark':'*',
-            'idsOnly':idsOnly
-        }
-        r = self.post('search', payload=this_payload, params=this_params)
-        return {'results':r}
+        full_response = []
+        this_mark = '*'
+        while True:
+            this_params = {
+                'global':False,
+                'size':size,
+                'mark':this_mark,
+                'idsOnly':idsOnly
+            }
+            r = self.post('search', payload=this_payload, params=this_params, threadindex=threadindex)
+            if type(r) == list and 'error' in r.keys():
+                this_e = {'error':str(e),'method':method,'payload':payload,'params':params,'elapsed':t1_stop-t1_start}
+            else:
+                this_data = r.json()
+                for c in this_data.get('content'):
+                    full_response.append(c)
+                if this_data.get('last') != True:
+                    this_mark = this_data.get('mark')
+                else:
+                    return {'results':full_response}
     
 def check_values(self, facetType, value):
     this_value = value
@@ -210,122 +162,10 @@ def check_values(self, facetType, value):
 
     return this_value
 
-# def input_validation(facetType, value):
-#     if facetType not in FACETS:
-#         return {'input_check': False, 'err': 'Facet values must be in {0}'.format(FACETS)}
-
-#     if facetType == 'alexaBucket':
-#         if value in ALEXA:
-#             return {'input_check': True, 'err':''}
-#         else:
-#             return {'input_check': False, 'err':'Alexa Rank Query values must be in {0}'.format(ALEXA)}
-
-#     if facetType == 'assetType':
-#         if value in _TYPE:
-#             return {'input_check': True, 'err':''}
-#         else:
-#             return {'input_check': False, 'err':'Alexa Rank Query values must be in {0}'.format(_TYPE)}
-
-#     if facetType == 'confidence':
-#         if value in CONFIDENCE:
-#             return {'input_check': True, 'err':''}
-#         else:
-#             return {'input_check': False, 'err':'Alexa Rank Query values must be in {0}'.format(CONFIDENCE)}
-
-#     if facetType == 'domainExpiration':
-#         if value in DOMAINEXP:
-#             return {'input_check': True, 'err':''}
-#         else:
-#             return {'input_check': False, 'err':'Alexa Rank Query values must be in {0}'.format(DOMAINEXP)}
-
-#     if facetType == 'portLastSeen':
-#         if value in PORTLASTSEEN:
-#             return {'input_check': True, 'err':''}
-#         else:
-#             return {'input_check': False, 'err':'Alexa Rank Query values must be in {0}'.format(PORTLASTSEEN)}
-
-#     if facetType == 'portState':
-#         if value in PORTSTATE:
-#             return {'input_check': True, 'err':''}
-#         else:
-#             return {'input_check': False, 'err':'Alexa Rank Query values must be in {0}'.format(PORTSTATE)}
-
-#     if facetType == 'priority':
-#         if value in PRIORITY:
-#             return {'input_check': True, 'err':''}
-#         else:
-#             return {'input_check': False, 'err':'Alexa Rank Query values must be in {0}'.format(PRIORITY)}
-
-#     if facetType == 'removedState':
-#         if value in REMOVEDSTATE:
-#             return {'input_check': True, 'err':''}
-#         else:
-#             return {'input_check': False, 'err':'Alexa Rank Query values must be in {0}'.format(REMOVEDSTATE)}
-
-#     if facetType == 'sslCertExpiration':
-#         if value in SSLCERTEXP:
-#             return {'input_check': True, 'err':''}
-#         else:
-#             return {'input_check': False, 'err':'Alexa Rank Query values must be in {0}'.format(SSLCERTEXP)}
-
-#     if facetType == 'state':
-#         if value in STATE:
-#             return {'input_check': True, 'err':''}
-#         else:
-#             return {'input_check': False, 'err':'Alexa Rank Query values must be in {0}'.format(STATE)}
-
-#     if facetType == 'validationType':
-#         if value in VALIDATIONTYPE:
-#             return {'input_check': True, 'err':''}
-#         else:
-#             return {'input_check': False, 'err':'Alexa Rank Query values must be in {0}'.format(VALIDATIONTYPE)}
-
 
 def process_query_object(self):
     values = []
     for e in self._fullQuery:
-        # this_o = ''
-
-        # if e['facet'] in ['state','status']:
-        #     if type(e['value']) is str:
-        #         if re.match(r'(?i)approved inventory',e['value']):
-        #             e['value']= 'CONFIRMED'
-        #     elif type(e['value']) is list:
-        #         for v in ['value']:
-        #             if re.match(r'(?i)approved inventory',v):
-        #                 v = 'CONFIRMED'
-
-        #     if type(e['value']) is str:
-        #         if re.match(r'(?i)candidate',e['value']):
-        #             e['value']= 'CANDIDATE'
-        #     elif type(e['value']) is list:
-        #         for v in ['value']:
-        #             if re.match(r'(?i)candidate',v):
-        #                 v = 'CANDIDATE'
-
-        #     if type(e['value']) is str:
-        #         if re.match(r'(?i)dependencies',e['value']):
-        #             e['value']= 'ASSOCIATED_THIRDPARTY'
-        #     elif type(e['value']) is list:
-        #         for v in ['value']:
-        #             if re.match(r'(?i)dependencies',v):
-        #                 v = 'ASSOCIATED_THIRDPARTY'
-            
-        #     if type(e['value']) is str:
-        #         if re.match(r'(?i)monitor only',e['value']):
-        #             e['value']= 'ASSOCIATED_PARTNER'
-        #     elif type(e['value']) is list:
-        #         for v in ['value']:
-        #             if re.match(r'(?i)monitor only',v):
-        #                 v = 'ASSOCIATED_PARTNER'
-
-        #     if type(e['value']) is str:
-        #         if re.match(r'(?i)requires investigation',e['value']):
-        #             e['value']= 'CANDIDATE_INVESTIGATE'
-        #     elif type(e['value']) is list:
-        #         for v in ['value']:
-        #             if re.match(r'(?i)requires investigation',v):
-        #                 v = 'CANDIDATE_INVESTIGATE'
 
         this_v = {
             'name':e['facet'],

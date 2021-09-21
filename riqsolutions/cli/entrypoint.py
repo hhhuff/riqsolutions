@@ -1,5 +1,3 @@
-__version__ = '0.5.0'
-
 import argparse
 from . import configure
 from . import init

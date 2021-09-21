@@ -1,4 +1,5 @@
 from .riskiqapi import RiskIQAPI
+from .values import Value
 
 class Workspace(RiskIQAPI):
     def __init__(self, api_token=None, api_key=None, proxy=None, context=None):
@@ -30,25 +31,26 @@ class Workspace(RiskIQAPI):
         if type(tag) != str and type(tag) != list:
             reqs += ' ** tag must be type(str) or type(list)'
         if color is None:
-            reqs += ' ** must include color=[yellow, green, orange, red, purple, green-2, dark-gray, blue, black, white, indigo, gray]' 
-        if color is not None and color not in colors:
-            reqs += ' ** color must be one of: [yellow, green, orange, red, purple, green-2, dark-gray, blue, black, white, indigo, gray]' 
+            reqs += ' ** must include color' 
         if reqs != '':
             raise ValueError(reqs)
+
+        _c = Value()
+        _c.color = color 
 
         this_tags = []
         if type(tag) is list:
             for t in tag:
                 this_t = {
                     'name': t,
-                    'color': color,
+                    'color': _c.color,
                     'type': 'INVENTORY'
                 }
                 this_tags.append(this_t)
         else:
             this_tags = [{
                 'name': tag,
-                'color': color,
+                'color': _c.color,
                 'type': 'INVENTORY'
             }]
 

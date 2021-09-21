@@ -189,6 +189,7 @@ class Facet():
     sslCertSubjectOrganization = 'sslCertSubjectOrganization'
     sslCertSubjectOrganizationalUnit = 'sslCertSubjectOrganizationalUnit'
     state = 'state'
+    status = 'state'
     subjectAlternativeName = 'subjectAlternativeName'
     subjectCommonName = 'subjectCommonName'
     tag = 'tag'
