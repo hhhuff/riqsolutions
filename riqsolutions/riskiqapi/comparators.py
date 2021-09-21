@@ -1,3 +1,4 @@
+"""Facet Module for the RiskIQ Solutions Python API Library"""
 
 _COMPARATORS_ = {
     'equals':'EQ',
@@ -28,6 +29,7 @@ _COMPARATORS_ = {
 }
 
 class Comparator():
+    """Represents the Comparator portion of a Query object"""
     equals = 'equals'
     notEquals = 'notEquals'
     _in = '_in'
@@ -69,4 +71,9 @@ class Comparator():
                 self._comparator = v
 
     def get_comparators(self):
+        """
+        Returns all available comparators
+
+        :returns: list(_COMPARATORS_.keys())
+        """
         return list(_COMPARATORS_.keys())
