@@ -1,3 +1,5 @@
+"""Query Module for the RiskIQ Solutions Python API Library"""
+
 from .riskiqapi import RiskIQAPI
 from riqsolutions.riskiqapi.workspace import Workspace
 from riqsolutions.riskiqapi.facets import Facet
@@ -7,6 +9,9 @@ from riqsolutions.cli import configure_api
 import json
 
 class Query(RiskIQAPI):
+    """
+    Represents a Query against the Global Inventory API
+    """
     def __init__(self, api_token=None, api_key=None, proxy=None, context=None):
         super().__init__(
             api_token, 
@@ -20,6 +25,11 @@ class Query(RiskIQAPI):
         self._EC = 0
 
     def get_query(self):
+        """
+        Returns the current Query object
+
+        :returns: self._fullQuery
+        """
         return self._fullQuery
 
     def get_facets(self):
@@ -31,6 +41,13 @@ class Query(RiskIQAPI):
         return this_f.get_comparators()
 
     def add(self, facet=None, comparator=None, value=None):
+        """
+        Add a single statement (facet, comparator, value) to a query object
+
+        :param facet: type str or Facet(), required
+        :param comparator: type str or Comparator(), required
+        :param value: type str or Value(), required
+        """
         this_f = Facet()
         this_f.facet = facet
 
@@ -89,6 +106,11 @@ class Query(RiskIQAPI):
         )
 
     def remove(self, id):
+        """
+        Remove a single statement (facet, comparator, value) from the current query object
+        
+        :param id: type int, required
+        """
         if type(id) is not list:
             for e in self._fullQuery:
                 if e['expressionId'] == id:
@@ -102,12 +124,14 @@ class Query(RiskIQAPI):
             
     def run(self, size=1000, idsOnly=False, threadindex=None):
         """
+        Executes the current query object
+
         https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_search
-        query: type(json) - required
-        global: type(bool) - optional (default: False) << don't make available?
-        size: type(int) - optional (default: 1000)
-        idsOnly: type(bool) - optional (default: False)
+        
+        :param size: type int, optional (default:1000)
+        :param idsOnly: type bool, optional (default: False)
         """
+        
         this_payload = process_query_object(self)
         full_response = []
         this_mark = '*'
