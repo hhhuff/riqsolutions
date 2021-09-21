@@ -19,6 +19,7 @@ Source code can be found on github `Here <https://github.com/philcowger/riqsolut
 
    getting-started
    globalinventory
+   query
 
 
 
