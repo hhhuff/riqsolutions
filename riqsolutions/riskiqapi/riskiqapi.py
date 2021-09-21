@@ -13,35 +13,51 @@ import logging
 from logging.handlers import RotatingFileHandler
 import inspect
 import re
+from time import perf_counter
 
-# m = re.search('\/lib\/python(.*)', os.path.dirname(inspect.getfile(inspect))).group()
-# module_path = '{0}{1}/site-packages/riqsolutions/riskiqapi'.format(os.getcwd(), m)
-# log_formatter = logging.Formatter('%(asctime)s %(levelname)s - %(module)s:%(funcName)s(): %(message)s')
-# logFile = '{0}/log/riqsolutions.log'.format(module_path)
-# my_handler = RotatingFileHandler(logFile, mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
-# my_handler.setFormatter(log_formatter)
-# my_handler.setLevel(logging.INFO)
+log_formatter = logging.Formatter('%(asctime)s %(levelname)s - %(module)s:%(funcName)s(): %(message)s')
+my_handler = RotatingFileHandler(
+    os.path.realpath(__file__).replace('riskiqapi.py','log/riqsolutions.log'), 
+    mode='a', 
+    maxBytes=5*1024*1024, 
+    backupCount=2, 
+    encoding=None, 
+    delay=0
+)
+my_handler.setFormatter(log_formatter)
+my_handler.setLevel(logging.INFO)
 logger = logging.getLogger('root')
-# logger.setLevel(logging.INFO)
-# logger.addHandler(my_handler)
+logger.setLevel(logging.INFO)
+logger.addHandler(my_handler)
 logger.info('RiskIQ Solutions API Library')
 
 
 class RiskIQAPI():
-    def __init__(self, api_token=None, api_key=None, proxy=None, context=None, url_prefix='', hostname=''):
+    def __init__(self, api_token=None, api_key=None, proxy=None, context=None, url_prefix='', hostname='', timeout=(5.0,30.0), retries=2, backoff=0.1, threadindex=None):
         self._token = api_token
         self._key = api_key
         self._proxy = proxy
         self._context = context
         self._prefix = url_prefix
         self._hostname = hostname
-        self._session = get_session(proxy=proxy)
+        self._timeout = timeout
+        self._markcount = 0
+        retry_strategy = Retry(
+            total = retries,
+            connect = 3,
+            backoff_factor = backoff,
+            status_forcelist = [429, 500, 502, 503, 504],
+            method_whitelist = ["GET", "POST"]
+        )
+        self._adapter = HTTPAdapter(max_retries = retry_strategy)
+        self._session = requests.Session()
+        
+        self._session.mount("https://", self._adapter)
         self._session.headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
             'User-Agent': 'RiskIQSolutions'
         }
-        
 
     def configure(self, api_token, api_key, proxy, context):
         self._token = api_token
@@ -49,43 +65,30 @@ class RiskIQAPI():
         self._proxy = proxy
         self._context = context
 
-    def _request(self, method, endpoint, payload={}, params={}, xml=None):
-        type_list= ['DOMAIN', 'HOST', 'PAGE', 'IP_BLOCK', 'IP_ADDRESS', 'CONTACT', 'SSL_CERT', 'AS']
-        if 'connected' in endpoint:
-            full_response = {'DOMAIN':[],'HOST':[],'PAGE':[],'IP_BLOCK':[],'IP_ADDRESS':[],'CONTACT':[],'SSL_CERT':[],'AS':[]}
-        else:
-            full_response = []
-        page_count = 0
-        this_mark = "*"
-        record_counter = 0
-        while True:  
+    def _request(self, method, endpoint, payload={}, params={}, xml=None, thread_data=None):
+        try:
             if xml is not None and xml == True:
                 self._session.headers = {
                     'Content-Type': 'application/json',
                     'Accept': 'text/xml',
                     'User-Agent': 'RiskIQSolutions'
                 }
-            if params is not None and 'page' in params.keys():
-                params['page'] = page_count
-            if params is not None and 'mark' in params.keys():
-                params['mark'] = this_mark
             url = 'https://{0._hostname}/{0._prefix}/{1}'.format(self, endpoint)
-
-            logger.info('url: {0}'.format(url))
-            logger.info('method: {0}'.format(method))
-            # logger.info('params: {0}'.format(params))
-            # logger.info('payload: {0}'.format(payload))
-
             creds = (self._token, self._key)
+
+            t1_start = perf_counter()
             if method == "DELETE":
                 req = requests.delete(url, auth=creds, params=params, json=payload)
-            else:
-                req = self._session.request(method, url, auth=creds, params=params, json=payload)
-
-            logger.info(req)
-
-            if method == "DELETE":
                 return req
+            else:
+                req = self._session.request(method, url, auth=creds, params=params, json=payload, timeout=self._timeout)
+            t1_stop = perf_counter()
+
+            if thread_data != None:
+                logger.info('{0}-thr:{1} -queue#:{2} -url: {3} -method: {4} - statuscode: {45} -elapsed(sec):{6}'.format(self._context,thread_data.get('threadindex'), thread_data.get('qsize'), url, method, req.status_code, t1_stop-t1_start))
+            else:
+                logger.info('{0}-url: {1} -method: {2} - statuscode: {3} -elapsed(sec):{4}'.format(self._context, url, method, req.status_code, t1_stop-t1_start))
+
             if 'Content-Type' in req.headers.keys() and req.headers.get('Content-Type') == 'text/xml':
                 parser = etree.XMLParser(recover=True)
                 tree = etree.parse(io.StringIO(req.text), parser)
@@ -94,68 +97,33 @@ class RiskIQAPI():
                     temp_data = xmltodict.parse(fd.read(),attr_prefix='')
                 os.remove('{0}/tmp/tmp.xml'.format(module_path))
                 this_data = json.loads(json.dumps(temp_data))
-
                 return this_data
+            
+            if type(req.json()) is not list and 'last' in req.json().keys():
+                self._markcount += req.json().get('numberOfElements')
+                logger.info('{0} Retrieved {1} of {2}'.format(self._context, self._markcount, req.json().get('totalElements')))
+                if req.json().get('last') == True:
+                    self._markcount = 0
+                
+            return req
+        except Exception as e:
+            t1_stop = perf_counter()
+            this_e = {'error':str(e),'method':method,'payload':payload,'params':params,'elapsed':t1_stop-t1_start}
+            if thread_data != None:
+                logger.info('{0}-thr:{1} -elapsed(sec):{2} \n - method {3} \n - payload: {4} \n - params: {5} \n - error: {6}'.format(self._context, thread_data.get('threadindex'), t1_stop-t1_start, this_e.get('error'), method, payload, params))
             else:
-                this_data = req.json()
-
-            if 'connected' in url:
-                moreflag = False
-                for t in type_list:
-                    if t in this_data.keys():
-                        if this_data.get(t)['last'] == False:
-                            moreflag = True
-                        if len(this_data.get(t)['content']) > 0:
-                            for c in this_data.get(t)['content']:
-                                full_response.get(t).append(c)
-                if moreflag == True:
-                    page_count += 1
-                else:
-                    return full_response
-
-            elif type(this_data) is not list and 'last' in this_data.keys():
-                this_mark = this_data['mark']
-                record_counter += this_data['numberOfElements']
-                page_count += 1
-                logger.info('Retrieved {0} of {1}'.format(record_counter, this_data['totalElements']))
-                for c in this_data.get('content'):
-                    full_response.append(c)
-                if this_data.get('last') == True:
-                    return full_response
-            else:
-                return req
-
+                logger.info('{0}-{1}'.format(self._context,this_e))
+            return this_e
+            
     def get_context(self):
         return self._context
 
-    def get(self, endpoint, payload=None, params=None, xml=None):        
-        return self._request('GET', endpoint, payload=payload, params=params, xml=xml)
+    def get(self, endpoint, payload=None, params=None, xml=None, thread_data=None):
+        return self._request('GET', endpoint, payload=payload, params=params, xml=xml, thread_data=thread_data)
 
-    def post(self, endpoint, payload=None, params=None, xml=None):
-        return self._request('POST', endpoint, payload=payload, params=params, xml=xml)
+    def post(self, endpoint, payload=None, params=None, xml=None, thread_data=None):
+        return self._request('POST', endpoint, payload=payload, params=params, xml=xml, thread_data=thread_data)
 
     def delete(self, endpoint, payload=None, params=None, xml=None):
         return self._request('DELETE', endpoint, payload=payload, params=params, xml=xml)
-
-def get_session_adapter():
-    def debug_log(f):
-        @functools.wraps(f)
-        def decor(*args, **kwargs):
-            logger.info(f'[X] had to go into retry logic')
-            return f(*args, **kwargs)
-        return decor
-    retry_strategy = Retry(
-        total=10,
-        backoff_factor=.1,
-        status_forcelist=[429, 500, 502, 503, 504]
-    )
-    retry_strategy.increment = debug_log(retry_strategy.increment)
-    return HTTPAdapter(max_retries=retry_strategy)
-
-def get_session(proxy=None):
-    session = requests.Session()
-    session.mount('https://', get_session_adapter())
-    if proxy is not None:
-        proxies = {'https': proxy}
-        session.proxies.update(proxies)
-    return session
+    

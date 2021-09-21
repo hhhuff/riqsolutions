@@ -1,5 +1,3 @@
-__version__ = '0.5.0'
-
 from os.path import expanduser, join, exists
 import configparser
 from getpass import getpass, getuser

@@ -39,16 +39,73 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">riqsolutions.riskiqapi.</span></span><span class="sig-name descname"><span class="pre">GlobalInventory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proxy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory" title="Permalink to this definition">¶</a></dt>
-<dd><p>Represents a Global Inventory Asset (or list of Assets)</p>
+<dd><p>Represents a request to the Global Inventory API</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.add_asset">
-<span class="sig-name descname"><span class="pre">add_asset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asset_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.add_asset" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_asset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asset_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_name_type_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confirm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targetAssetTypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.add_asset" title="Permalink to this definition">¶</a></dt>
 <dd><p># <a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_assets_add">https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_assets_add</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>asset_name</strong> – type str</p></li>
-<li><p><strong>asset_type</strong> – type str</p></li>
+<li><p><strong>asset_name</strong> – type str (requires asset_type)</p></li>
+<li><p><strong>asset_type</strong> – type str (requires asset_name)</p></li>
+<li><p><strong>asset_name_type_list</strong> – type list - optional ( ex. [{“name”:asset_name,”type”:asset_type}, …] )</p></li>
+<li><p><strong>confirm</strong> – type bool (optional - default: False) A boolean value to indicate if the asset state should be CONFIRMED into inventory (confirm: true) or as a CANDIDATE asset in inventory (confirm: false or not specified)</p></li>
+<li><p><strong>targetAssetTypes</strong> – type str or type list - A string or array of target asset types to also add to inventory, along with any supplied properties, that are connected to the asset identifiers (e.g. an asset identifier for a PAGE can cascade the properties to all known IPs for that PAGE).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.cancel_task">
+<span class="sig-name descname"><span class="pre">cancel_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">taskid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.cancel_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cancel a single task</p>
+<p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_task_id_cancel">https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_task_id_cancel</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>taskid</strong> – type str, required</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.create_brands">
+<span class="sig-name descname"><span class="pre">create_brands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">brand</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.create_brands" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new brand tag</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>brand</strong> – type str, required</p></li>
+<li><p><strong>color</strong> – type str, required</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.create_organizations">
+<span class="sig-name descname"><span class="pre">create_organizations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">organization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.create_organizations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new organization tag</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>organization</strong> – type str, required</p></li>
+<li><p><strong>color</strong> – type str, required</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.create_tags">
+<span class="sig-name descname"><span class="pre">create_tags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.create_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new inventory tag</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tag</strong> – type str, required</p></li>
+<li><p><strong>color</strong> – type str, required</p></li>
 </ul>
 </dd>
 </dl>
@@ -57,15 +114,33 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.get_asset">
 <span class="sig-name descname"><span class="pre">get_asset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asset_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.get_asset" title="Permalink to this definition">¶</a></dt>
-<dd><p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type">https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type</a></p>
+<dd><p>Retrieve enrichment data of a single asseet.</p>
+<p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type">https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>asset_type</strong> – type str</p></li>
-<li><p><strong>asset_name</strong> – type str</p></li>
+<li><p><strong>asset_type</strong> – type str, required</p></li>
+<li><p><strong>asset_name</strong> – type str, required</p></li>
 <li><p><strong>recent</strong> – type bool, optional</p></li>
 <li><p><strong>global</strong> – type bool, optional</p></li>
 <li><p><strong>size</strong> – type int, optional</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.get_asset_attributes">
+<span class="sig-name descname"><span class="pre">get_asset_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asset_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.get_asset_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve attributes enrichment data of a single asset.</p>
+<p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type">https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>asset_type</strong> – type str, required</p></li>
+<li><p><strong>asset_name</strong> – type str, required</p></li>
+<li><p><strong>recent</strong> – type bool, optional (default: True)</p></li>
+<li><p><strong>size</strong> – type int, optional (default: 100)</p></li>
 </ul>
 </dd>
 </dl>
@@ -74,12 +149,12 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.get_asset_by_id">
 <span class="sig-name descname"><span class="pre">get_asset_by_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uuid</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recent</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.get_asset_by_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Submit the UUID of an asset to retrieve its record
-<a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_id_uuid">https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_id_uuid</a></p>
+<dd><p>Retrieve enrichment data for a single asset by its UUID.</p>
+<p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_id_uuid">https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_id_uuid</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>uuid</strong> – type str</p></li>
+<li><p><strong>uuid</strong> – type str, required</p></li>
 <li><p><strong>recent</strong> – type bool, optional</p></li>
 <li><p><strong>global</strong> – type bool, optional</p></li>
 </ul>
@@ -88,21 +163,71 @@
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.get_asset_certificates">
+<span class="sig-name descname"><span class="pre">get_asset_certificates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asset_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.get_asset_certificates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve certificates enrichment data of a single asset.</p>
+<p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type">https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>asset_type</strong> – type str, required</p></li>
+<li><p><strong>asset_name</strong> – type str, required</p></li>
+<li><p><strong>recent</strong> – type bool, optional (default: True)</p></li>
+<li><p><strong>size</strong> – type int, optional (default: 100)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.get_asset_connected">
+<span class="sig-name descname"><span class="pre">get_asset_connected</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asset_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idsOnly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.get_asset_connected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve connected assets data of a single asset.</p>
+<p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type">https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>asset_type</strong> – type str, required</p></li>
+<li><p><strong>asset_name</strong> – type str, required</p></li>
+<li><p><strong>recent</strong> – type bool, optional (default: True)</p></li>
+<li><p><strong>size</strong> – type int, optional (default: 100)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.get_asset_cookies">
+<span class="sig-name descname"><span class="pre">get_asset_cookies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asset_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.get_asset_cookies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve cookies enrichment data of a single asset.</p>
+<p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type">https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>asset_type</strong> – type str, required</p></li>
+<li><p><strong>asset_name</strong> – type str, required</p></li>
+<li><p><strong>recent</strong> – type bool, optional (default: True)</p></li>
+<li><p><strong>size</strong> – type int, optional (default: 100)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.get_asset_deltas">
-<span class="sig-name descname"><span class="pre">get_asset_deltas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asset_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ADDED'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">brand</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">organization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">page</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.get_asset_deltas" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_asset_deltas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asset_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ADDED'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">brand</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">organization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.get_asset_deltas" title="Permalink to this definition">¶</a></dt>
 <dd><p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_deltas">https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_deltas</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>asset_type</strong> – type str</p></li>
-<li><p><strong>date</strong> – type str</p></li>
-<li><p><strong>delta_range</strong> – type int, optional</p></li>
-<li><p><strong>measure</strong> – type str</p></li>
+<li><p><strong>asset_type</strong> – type str, required</p></li>
+<li><p><strong>date</strong> – type str, required</p></li>
+<li><p><strong>delta_range</strong> – type int, optional must be 1, 7, or 30</p></li>
+<li><p><strong>measure</strong> – type str, required</p></li>
 <li><p><strong>brand</strong> – type str, optional</p></li>
 <li><p><strong>organization</strong> – type str, optional</p></li>
 <li><p><strong>tag</strong> – type str, optional</p></li>
 <li><p><strong>size</strong> – type int, optional</p></li>
-<li><p><strong>page</strong> – type int, optional</p></li>
 </ul>
 </dd>
 </dl>
@@ -110,16 +235,67 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.get_asset_deltas_summary">
-<span class="sig-name descname"><span class="pre">get_asset_deltas_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">brand</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">organization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">page</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.get_asset_deltas_summary" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_asset_deltas_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">brand</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">organization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.get_asset_deltas_summary" title="Permalink to this definition">¶</a></dt>
 <dd><p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_deltas_summary">https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_deltas_summary</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>date</strong> – type str</p></li>
-<li><p><strong>delta_range</strong> – type int, optional</p></li>
+<li><p><strong>date</strong> – type str, required</p></li>
+<li><p><strong>delta_range</strong> – type int, optional must be 1, 7, or 30</p></li>
 <li><p><strong>brand</strong> – type str, optional</p></li>
 <li><p><strong>organization</strong> – type str, optional</p></li>
 <li><p><strong>tag</strong> – type str, optional</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.get_asset_hostpairs">
+<span class="sig-name descname"><span class="pre">get_asset_hostpairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asset_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.get_asset_hostpairs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve hostpairs enrichment data of a single asset.</p>
+<p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type">https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>asset_type</strong> – type str, required</p></li>
+<li><p><strong>asset_name</strong> – type str, required</p></li>
+<li><p><strong>recent</strong> – type bool, optional (default: True)</p></li>
+<li><p><strong>size</strong> – type int, optional (default: 100)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.get_asset_minicrawls">
+<span class="sig-name descname"><span class="pre">get_asset_minicrawls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asset_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.get_asset_minicrawls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve minicrawls enrichment data of a single asset.</p>
+<p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type">https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>asset_type</strong> – type str, required</p></li>
+<li><p><strong>asset_name</strong> – type str, required</p></li>
+<li><p><strong>recent</strong> – type bool, optional (default: True)</p></li>
+<li><p><strong>size</strong> – type int, optional (default: 100)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.get_asset_web_components">
+<span class="sig-name descname"><span class="pre">get_asset_web_components</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asset_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.get_asset_web_components" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve web components enrichment data of a single asset.</p>
+<p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type">https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_assets_type</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>asset_type</strong> – type str, required</p></li>
+<li><p><strong>asset_name</strong> – type str, required</p></li>
+<li><p><strong>recent</strong> – type bool, optional (default: True)</p></li>
+<li><p><strong>size</strong> – type int, optional (default: 100)</p></li>
 </ul>
 </dd>
 </dl>
@@ -128,12 +304,13 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.get_assets_bulk">
 <span class="sig-name descname"><span class="pre">get_assets_bulk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asset_list</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.get_assets_bulk" title="Permalink to this definition">¶</a></dt>
-<dd><p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_assets_bulk">https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_assets_bulk</a></p>
+<dd><p>Retrieve encrichment data for a list of assets.</p>
+<p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_assets_bulk">https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_assets_bulk</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>asset_type</strong> – type str</p></li>
-<li><p><strong>asset_list</strong> – type list</p></li>
+<li><p><strong>asset_type</strong> – type str, required</p></li>
+<li><p><strong>asset_list</strong> – type list, required</p></li>
 </ul>
 </dd>
 </dl>
@@ -160,31 +337,53 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.get_task">
 <span class="sig-name descname"><span class="pre">get_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">taskid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.get_task" title="Permalink to this definition">¶</a></dt>
-<dd><p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_tasks">https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_tasks</a></p>
+<dd><p>Retrieve the status of a single task</p>
+<p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_tasks">https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_tasks</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>taskid</strong> – type str, required</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.get_tasks">
 <span class="sig-name descname"><span class="pre">get_tasks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.get_tasks" title="Permalink to this definition">¶</a></dt>
-<dd><p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_tasks">https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_tasks</a></p>
+<dd><p>Retrieve the status of all current tasks</p>
+<p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_tasks">https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_tasks</a></p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.inventory_search">
 <span class="sig-name descname"><span class="pre">inventory_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">query:</span> <span class="pre">&lt;module</span> <span class="pre">'json'</span> <span class="pre">from</span> <span class="pre">'/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.7/lib/python3.7/json/__init__.py'&gt;</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">size:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">100</span></em>, <em class="sig-param"><span class="pre">page:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.inventory_search" title="Permalink to this definition">¶</a></dt>
-<dd><p>Submit json which was generated from the UI to retrieve results through the API. 
-<a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_search">https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_search</a></p>
+<dd><p>Perform an inventory search by submitting json which was generated from the UI.</p>
+<p><a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_search">https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_search</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>query</strong> – type json</p></li>
+<li><p><strong>query</strong> – type json, required</p></li>
 <li><p><strong>global</strong> – type bool, optional</p></li>
 <li><p><strong>size</strong> – type int), optional</p></li>
-<li><p><strong>page</strong> – type int), optional</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>{‘results’:r}</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.remove_asset">
+<span class="sig-name descname"><span class="pre">remove_asset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asset_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_name_type_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targetAssetTypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.remove_asset" title="Permalink to this definition">¶</a></dt>
+<dd><p># <a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_update">https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_update</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>asset_name</strong> – type str (requires asset_type)</p></li>
+<li><p><strong>asset_type</strong> – type str (requires asset_name)</p></li>
+<li><p><strong>asset_name_type_list</strong> – type list - optional ( ex. [{“name”:asset_name,”type”:asset_type}, …] )</p></li>
+<li><p><strong>targetAssetTypes</strong> – type str or type list - A string or array of target asset types to also add to inventory, along with any supplied properties, that are connected to the asset identifiers (e.g. an asset identifier for a PAGE can cascade the properties to all known IPs for that PAGE).</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -196,11 +395,28 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>asset_name</strong> – type str</p></li>
-<li><p><strong>asset_type</strong> – type str</p></li>
-<li><p><strong>update_type</strong> – type str</p></li>
-<li><p><strong>update_value</strong> – type str</p></li>
+<li><p><strong>action</strong> – type str, required (must be add or remove)</p></li>
+<li><p><strong>asset_name</strong> – type str, required</p></li>
+<li><p><strong>asset_type</strong> – type str, required</p></li>
+<li><p><strong>update_type</strong> – type str, required (must be in {0})</p></li>
+<li><p><strong>update_value</strong> – type str, required</p></li>
 <li><p><strong>failOnError</strong> – type bool, optional</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.GlobalInventory.update_asset_state">
+<span class="sig-name descname"><span class="pre">update_asset_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asset_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_name_type_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.GlobalInventory.update_asset_state" title="Permalink to this definition">¶</a></dt>
+<dd><p># <a class="reference external" href="https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_update">https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_update</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>asset_name</strong> – type str (requires asset_type)</p></li>
+<li><p><strong>asset_type</strong> – type str (requires asset_name)</p></li>
+<li><p><strong>state</strong> – type str - required</p></li>
+<li><p><strong>asset_name_type_list</strong> – type list - optional ( ex. [{“name”:asset_name,”type”:asset_type}, …] )</p></li>
 </ul>
 </dd>
 </dl>
