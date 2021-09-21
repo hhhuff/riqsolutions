@@ -1,3 +1,4 @@
+"""Facet Module for the RiskIQ Solutions Python API Library"""
 
 _FACETS_ = {
     'admin':'admin',
@@ -105,6 +106,7 @@ _FACETS_ = {
 }
 
 class Facet():
+    """Represents the Facet portion of a Query object"""
     admin = 'admin'
     adminEmail = 'adminEmail'
     adminOrg = 'adminOrg'
@@ -227,4 +229,9 @@ class Facet():
                 self._facet = v
 
     def get_facets(self):
+        """
+        Returns all available facets
+
+        :returns: list(_FACETS_.keys())
+        """
         return list(_FACETS_.keys())
