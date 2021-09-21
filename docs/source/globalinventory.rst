@@ -1,6 +1,6 @@
-=======================
-Globan Inventory Module
-=======================
+================
+Global Inventory
+================
 
 
 Global Inventory Module
