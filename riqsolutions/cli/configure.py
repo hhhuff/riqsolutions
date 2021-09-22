@@ -56,7 +56,7 @@ def main(args):
         return 1
     
     if not args.proxy:
-        proxy = getuser(' (optional) Proxy: ')
+        proxy = ''
     else:
         proxy = args.proxy
     

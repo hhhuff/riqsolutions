@@ -1,9 +1,11 @@
 from .riskiqapi import RiskIQAPI
+import datetime
 
 _ACTION_ = {'add':'ADD','remove':'REMOVE'}
 _ALEXA_ = {'notinalexa':'NotRanked','top 100k':'Bucket1','top 10k':'Bucket0'}
 _COLORS_ = {'yellow':'yellow', 'green':'green', 'orange':'orange', 'red':'red', 'purple':'purple', 'green-2':'green-2', 'dark-gray':'dark-grey', 'blue':'blue', 'black':'black', 'white':'white', 'indigo':'indigo', 'gray':'gray'}
 _CONFIDENCE_ = {'absolute':'ABSOLUTE','high':'HIGH','low':'LOW','medium':'MEDIUM','unknown':'UNKNOWN','unlikely':'UNLIKELY'}
+_DELTARANGE_ = {'1 day': 1,'7 days': 7,'30 days': 30,'1day': 1,'7days': 7,'30days': 30,1: 1,7: 7,30: 30}
 _DOMAINEXPIRATION_ = {'expired':'Expired','expires in 30 days':'Expires30','expires in 60 days':'Expires60','expires in 90 days':'Expires90','expires in > 90 days':'ExpiresAfter90'}
 _ENTERPRISE_ = {'true':True,'false':False}
 _PORTLASTSEEN_ = {'7 days':7,'14 days':14,'30 days':30,'7days':7,'14days':14,'30days':30,7:7,14:14,30:30}
@@ -15,24 +17,22 @@ _STATE_ = {'approved inventory':'CONFIRMED','confirmed':'CONFIRMED','candidate':
 _ASSETTYPE_ = {'asn':'AS','contact':'CONTACT','domain':'DOMAIN','host':'HOST','ip address':'IP_ADDRESS','ip block':'IP_BLOCK','mail server':'MAIL_SERVER','name server':'NAME_SERVER','page':'PAGE','resource':'RESOURCE','ssl cert':'SSL_CERT'}
 _UPDATETYPE_ = {'state':'state','status':'state','removedstate':'removedState','priority':'priority','enterprise':'enterprise','tag':'tag','brand':'brand','organization':'organization','primarycontact':'primaryContact','secondarycontact':'secondaryContact','externalid':'externalID','externalmetadata':'externalMetadata','note':'note'}
 _VALIDATIONTYPE_ = {'domain':'DOMAIN_VALIDATION','extended':'EXTENDED_VALIDATION','organization':'ORGANIZATION_VALIDATION'}
+_DATEFORMAT_ = '%Y-%m-%d'
+_DATETIMEFORMAT_ = '%Y-%m-%d %H:%M:%S'
+
 
 class Value(RiskIQAPI):
 
-    def __init__(self, api_token=None, api_key=None, proxy=None, context=None, value=None):
-        super().__init__(
-            api_token, 
-            api_key, 
-            proxy,
-            context,
-            url_prefix='v1/globalinventory', 
-            hostname='api.riskiq.net'
-            ) 
+    def __init__(self, gi_api=None, value=None):
+        self._gi_api = gi_api
         # common 
-        
         self._alexaBucket = None
         self._assetType = None
         self._color = None
         self._confidence = None
+        self._dateType = None
+        self._datetimeType = None
+        self._deltaRange = None
         self._domainExpiration = None
         self._portLastSeen = None
         self._portState = None
@@ -58,10 +58,94 @@ class Value(RiskIQAPI):
         self._note = None
         self._primaryContact = None
         self._secondarContact = None
-        
+        self._stringType = None
+        self._listType = None
+        self._dictType = None
+        self._assetNameTypeList = None
+
+    @property
+    def stringType(self):
+        """
+        String value input type validation
+        Set with Value().stringType = yourString
+
+        :returns: self._stringType
+        """
+        return self._stringType
     
+    @stringType.setter
+    def stringType(self, stringType):
+        if type(stringType) != str:
+            raise ValueError('must be of type(str)')
+        self._stringType = stringType
+        self._value = stringType
+
+    @property
+    def listType(self):
+        """
+        List value input type validation
+        Set with Value().listType = yourList
+
+        :returns: self._listType
+        """
+        return self._listType
+    
+    @listType.setter
+    def listType(self, listType):
+        if type(listType) != list:
+            raise ValueError('must be of type(list)')
+        self._listType = listType
+        self._value = listType
+
+    @property
+    def dictType(self):
+        """
+        Dict value input type validation
+        Set with Value().dictType = yourDict
+
+        :returns: self._dictType
+        """
+        return self._dictType
+    
+    @dictType.setter
+    def dictType(self, dictType):
+        if type(dictType) != dict:
+            raise ValueError('must be of type(dict)')
+        self._dictType = dictType
+        self._value = dictType
+
+    @property
+    def assetNameTypeList(self):
+        """
+        AssetNameTypeList value input type validation
+        Set with Value().assetNameTypeList = yourAssetNameTypeList
+
+        :returns: self._assetNameTypeList
+        """
+        return self._assetNameTypeList
+    
+    @assetNameTypeList.setter
+    def assetNameTypeList(self, assetNameTypeList):
+        if type(assetNameTypeList) != list:
+            raise ValueError('assetNameTypeList must be type(list)')
+        else:
+            for a in assetNameTypeList:
+                if type(a) != dict:
+                    raise ValueError('assetNameTypeList must contain at least one dict with format of {"name":yourName,"type":yourType}')
+                if 'name' not in a.keys() or 'type' not in a.keys():
+                    raise ValueError('assetNameTypeList must contain at least one dict with format of {"name":yourName,"type":yourType}')
+        self._assetNameTypeList = assetNameTypeList
+        self._value = assetNameTypeList
+
     @property
     def tag(self):
+        """
+        Returns current tag
+        Set with Value().tag = yourtag
+        Checks if requested invetory tag exists
+
+        :returns: self._tag
+        """
         return self._tag
     
     @tag.setter
@@ -96,6 +180,13 @@ class Value(RiskIQAPI):
 
     @property
     def brand(self):
+        """
+        Returns current brand
+        Set with Value().brand = yourbrand
+        Checks if requested brand tag exists
+
+        :returns: self._brand
+        """
         return self._brand
     
     @brand.setter
@@ -130,6 +221,13 @@ class Value(RiskIQAPI):
 
     @property
     def organization(self):
+        """
+        Returns current organization
+        Set with Value().organization = yourorganization
+        Checks if requested organization tag exists
+
+        :returns: self._organization
+        """
         return self._organization
     
     @organization.setter
@@ -163,7 +261,51 @@ class Value(RiskIQAPI):
                     self._org = v
 
     @property
+    def dateType(self):
+        """
+        Returns current Date Value
+        Set with Value().dateType = yourdateType
+
+        :returns: self._dateType
+        """
+        return self._dateType
+    
+    @dateType.setter
+    def dateType(self, dateType):
+        try:
+            datetime.datetime.strptime(dateType, _DATEFORMAT_)
+            self._dateType = dateType
+            self._value = dateType
+        except ValueError:
+            raise ValueError("Incorrect date format, should be YYYY-MM-DD")
+
+    @property
+    def datetimeType(self):
+        """
+        Returns current Date Value
+        Set with Value().datetimeType = yourdatetimeType
+
+        :returns: self._datetimeType
+        """
+        return self._datetimeType
+    
+    @datetimeType.setter
+    def datetimeType(self, datetimeType):
+        try:
+            datetime.datetime.strptime(datetimeType, _DATETIMEFORMAT_)
+            self._datetimeType = datetimeType
+            self._value = datetimeType
+        except ValueError:
+            raise ValueError("Incorrect datetime format, should be YYYY-MM-DD HH:MM:SS")
+
+    @property
     def value(self):
+        """
+        Returns current value
+        Set with Value().value = yourvalue
+
+        :returns: self._value
+        """
         return self._value
     
     @value.setter
@@ -181,6 +323,12 @@ class Value(RiskIQAPI):
 
     @property
     def action(self):
+        """
+        Returns current action
+        Set with Value().action = youraction
+
+        :returns: self._action
+        """
         return self._action
 
     @action.setter
@@ -191,6 +339,12 @@ class Value(RiskIQAPI):
 
     @property
     def alexaBucket(self):
+        """
+        Returns current alexaBucket
+        Set with Value().alexaBucket = youralexaBucket
+
+        :returns: self._alexaBucket
+        """
         return self._alexaBucket
 
     @alexaBucket.setter
@@ -201,6 +355,12 @@ class Value(RiskIQAPI):
 
     @property
     def assetType(self):
+        """
+        Returns current assetType
+        Set with Value().assetType = yourassetType
+
+        :returns: self._assetType
+        """
         return self._assetType
 
     @assetType.setter
@@ -212,6 +372,12 @@ class Value(RiskIQAPI):
     
     @property
     def updateType(self):
+        """
+        Returns current updateType
+        Set with Value().updateType = yourupdateType
+
+        :returns: self._updateType
+        """
         return self._updateType
 
     @updateType.setter
@@ -223,6 +389,12 @@ class Value(RiskIQAPI):
 
     @property
     def color(self):
+        """
+        Returns current color
+        Set with Value().color = yourcolor
+
+        :returns: self._color
+        """
         return self._color
 
     @color.setter
@@ -235,6 +407,12 @@ class Value(RiskIQAPI):
 
     @property
     def confidence(self):
+        """
+        Returns current confidence
+        Set with Value().confidence = yourconfidence
+
+        :returns: self._confidence
+        """
         return self._confidence
 
     @confidence.setter
@@ -245,7 +423,30 @@ class Value(RiskIQAPI):
             self._value = this_v
             
     @property
+    def deltaRange(self):
+        """
+        Returns current deltaRange
+        Set with Value().pdeltaRange = deltaRange
+
+        :returns: self._deltaRange
+        """
+        return self._deltaRange
+
+    @deltaRange.setter
+    def deltaRange(self, deltaRange):
+        if input_validation('deltaRange', _DELTARANGE_, deltaRange):
+            this_v = value_setter(_DELTARANGE_, deltaRange)
+            self._deltaRange = this_v
+            self._value = this_v
+
+    @property
     def domainExpiration(self):
+        """
+        Returns current domainExpiration
+        Set with Value().brand = yourdomainExpiration
+
+        :returns: self._domainExpiration
+        """
         return self._domainExpiration
 
     @domainExpiration.setter
@@ -257,6 +458,12 @@ class Value(RiskIQAPI):
 
     @property
     def portLastSeen(self):
+        """
+        Returns current portLastSeen
+        Set with Value().portLastSeen = yourportLastSeen
+
+        :returns: self._portLastSeen
+        """
         return self._portLastSeen
 
     @portLastSeen.setter
@@ -268,6 +475,12 @@ class Value(RiskIQAPI):
 
     @property
     def portState(self):
+        """
+        Returns current portState
+        Set with Value().portState = yourportState
+
+        :returns: self._portState
+        """
         return self._portState
 
     @portState.setter
@@ -279,6 +492,12 @@ class Value(RiskIQAPI):
 
     @property
     def priority(self):
+        """
+        Returns current priority
+        Set with Value().priority = yourpriority
+
+        :returns: self._priority
+        """
         return self._priority
 
     @priority.setter
@@ -290,6 +509,12 @@ class Value(RiskIQAPI):
 
     @property
     def removedState(self):
+        """
+        Returns current removedState
+        Set with Value().removedState = yourremovedState
+
+        :returns: self._removedState
+        """
         return self._removedState
 
     @removedState.setter
@@ -301,6 +526,12 @@ class Value(RiskIQAPI):
             
     @property
     def sslCertExpiration(self):
+        """
+        Returns current sslCertExpiration
+        Set with Value().sslCertExpiration = yoursslCertExpiration
+
+        :returns: self._sslCertExpiration
+        """
         return self._sslCertExpiration
 
     @sslCertExpiration.setter
@@ -312,6 +543,12 @@ class Value(RiskIQAPI):
 
     @property
     def state(self):
+        """
+        Returns current state
+        Set with Value().state = yourstate
+
+        :returns: self._state
+        """
         return self._state
 
     @state.setter
@@ -323,6 +560,12 @@ class Value(RiskIQAPI):
 
     @property
     def validationType(self):
+        """
+        Returns current validationType
+        Set with Value().validationType = yourvalidationType
+
+        :returns: self._validationType
+        """
         return self._validationType
 
     @validationType.setter
@@ -334,6 +577,12 @@ class Value(RiskIQAPI):
         
     @property
     def enterprise(self):
+        """
+        Returns current enterprise
+        Set with Value().enterprise = yourenterprise
+
+        :returns: self._enterprise
+        """
         return self._enterprise
     
     @enterprise.setter
@@ -345,6 +594,12 @@ class Value(RiskIQAPI):
     
     @property
     def externalID(self):
+        """
+        Returns current externalID
+        Set with Value().externalID = yourexternalID
+
+        :returns: self._externalID
+        """
         return self._externalID
     
     @externalID.setter
@@ -354,6 +609,12 @@ class Value(RiskIQAPI):
 
     @property
     def externalMetadata(self):
+        """
+        Returns current externalMetadata
+        Set with Value().externalMetadata = yourexternalMetadata
+
+        :returns: self._externalMetadata
+        """
         return self._externalID
     
     @externalMetadata.setter
@@ -363,6 +624,12 @@ class Value(RiskIQAPI):
     
     @property
     def note(self):
+        """
+        Returns current note
+        Set with Value().note = yournote
+
+        :returns: self._note
+        """
         return self._note
 
     @note.setter
@@ -372,6 +639,12 @@ class Value(RiskIQAPI):
 
     @property
     def primaryContact(self):
+        """
+        Returns current primaryContact
+        Set with Value().primaryContact = yourprimaryContact
+
+        :returns: self._primaryContact
+        """
         return self._primaryContact
 
     @primaryContact.setter
@@ -381,6 +654,12 @@ class Value(RiskIQAPI):
 
     @property
     def secondaryContact(self):
+        """
+        Returns current secondaryContact
+        Set with Value().secondaryContact = yoursecondaryContact
+
+        :returns: self._secondaryContact
+        """
         return self._secondaryContact
 
     @secondaryContact.setter
@@ -400,6 +679,9 @@ def input_validation(this_facet, facet_dict, value):
             else:
                 if t not in list(facet_dict.keys()):
                     raise ValueError('{0} must be in: {1}'.format(this_facet, list(facet_dict.keys())))
+    elif type(value) == int:
+        if value not in list(facet_dict.keys()):
+            raise ValueError('{0} must be in: {1}'.format(this_facet, list(facet_dict.keys())))
     else:
         if value.lower() not in list(facet_dict.keys()):
             raise ValueError('{0} must be in: {1}'.format(this_facet, list(facet_dict.keys())))  
@@ -419,27 +701,32 @@ def value_setter(this_facet, value):
         this_value = this_l
     else:
         for k,v in this_facet.items():
-            if value.lower() == k:
-                this_value = v
+            if type(value) == str:
+                if value.lower() == k:
+                    this_value = v
+            elif type(value) == int:
+                if value == k:
+                    this_value = v
+            else:
+                raise TypeError('{0} is unexpectd type: {1}'.format(value, type(value)))
     return this_value
 
 def get_tags(self):
-    tagList = self.get('tags')
+    tagList = self._gi_api.get('tags')
     this_tagList = {}
     for t in tagList.json():
         this_tagList.update({t['name']:t['id']})
     return this_tagList
 
 def get_brands(self):
-    brandList = self.get('brands')
+    brandList = self._gi_api.get('brands')
     this_brandList = {}
-    print(json.dumps(brandList, indent=4))
     for b in brandList.json():
         this_brandList.update({b['name']:b['id']})
     return this_brandList
 
 def get_organizations(self):
-    orgList = self.get('organizations')
+    orgList = self._gi_api.get('organizations')
     this_orgList = {}
     for o in orgList.json():
         this_orgList.update({o['name']:o['id']})
