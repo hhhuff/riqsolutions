@@ -54,7 +54,7 @@ class Query(RiskIQAPI):
         this_c = Comparator()
         this_c.comparator = comparator
 
-        this_v = Value()
+        this_v = Value(self)
         configure_api(this_v, context=self.get_context())
         if this_f.facet.lower() == 'alexabucket':
             this_v.alexaBucket = value
@@ -122,7 +122,7 @@ class Query(RiskIQAPI):
                         self._fullQuery.remove(e)
                 
             
-    def run(self, size=1000, idsOnly=False, threadindex=None):
+    def run(self, size=1000, idsOnly=False):
         """
         Executes the current query object
 
@@ -135,6 +135,7 @@ class Query(RiskIQAPI):
         this_payload = process_query_object(self)
         full_response = []
         this_mark = '*'
+        count=0
         while True:
             this_params = {
                 'global':False,
@@ -142,10 +143,14 @@ class Query(RiskIQAPI):
                 'mark':this_mark,
                 'idsOnly':idsOnly
             }
-            r = self.post('search', payload=this_payload, params=this_params, threadindex=threadindex)
+            r = self.post('search', payload=this_payload, params=this_params)
             if type(r) == list and 'error' in r.keys():
-                this_e = {'error':str(e),'method':method,'payload':payload,'params':params,'elapsed':t1_stop-t1_start}
+                if count >= 5:
+                    raise ValueError('Query().run failed too many times on the same mark bundle')
+                else:
+                    count += 1
             else:
+                count = 0
                 this_data = r.json()
                 for c in this_data.get('content'):
                     full_response.append(c)
@@ -153,6 +158,7 @@ class Query(RiskIQAPI):
                     this_mark = this_data.get('mark')
                 else:
                     return {'results':full_response}
+
     
 def check_values(self, facetType, value):
     this_value = value

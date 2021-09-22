@@ -25,31 +25,62 @@ class GlobalInventory(RiskIQAPI):
             hostname='api.riskiq.net')
     
 
-    def inventory_search(self, query: json=None, size: int=100, page: int=0):
+    def inventory_search(self, query: json=None, savedSearchID=None, savedSearchName=None, size: int=100, idsOnly=False):
         """
         Perform an inventory search by submitting json which was generated from the UI.
 
         https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_search
 
-        :param query: type json, required
-        :param global: type bool, optional
-        :param size: type int), optional
+        :param query: type json, optional
+        :param savedSearchId: type str, optional
+        :param savedSarchName: type str, optional
+        :param size: type int, optional (Default: 100)
+        :param idsOnly: type bool, optional (Default: False)
 
         :returns: {'results':r}
         """
-        reqs = ''
-        if query == None:
-            reqs += ' ** a query type dict) is required'
-        if reqs != '':
-            raise ValueError(reqs)
-
         this_params = {
             'global':False,
             'size':size,
-            'mark':'*'
+            'mark':this_mark,
+            'idsOnly':idsOnly
         }
-        r = self.post('search', payload=query, params=this_params)
-        return {'results':r}
+
+        this_payload = None
+        if query != None:
+            _v = Value(self)
+            _v.typeDict = query
+            this_payload = _v.value
+        elif savedSearchID != None:
+            _s = Value(self)
+            _s.stringType = savedSearchID
+            this_params['savedSearchID'] = _s.value
+        elif savedSearchName != None:
+            _s = Value(self)
+            _s.stringType = savedSearchName
+            this_params['savedSearchName'] = _s.value
+
+        full_response = []
+        this_mark = '*'
+        count=0
+        while True:
+            this_params['mark'] = this_mark
+            r = self.post('search', payload=this_payload, params=this_params)
+            if type(r) == dict and 'error' in r.keys():
+                if count >= 5:
+                    raise ValueError('GlobalInventory.inventory_search() failed too many times on the same mark bundle')
+                else:
+                    count += 1
+            else:
+                count = 0
+                this_data = r.json()
+                for c in this_data.get('content'):
+                    full_response.append(c)
+                if this_data.get('last') != True:
+                    this_mark = this_data.get('mark')
+                else:
+                    return {'results':full_response}
+
 
     def get_asset_by_id(self, uuid: str=None, recent: bool=True):
         """
@@ -61,18 +92,15 @@ class GlobalInventory(RiskIQAPI):
         :param recent: type bool, optional
         :param global: type bool, optional
         """
-        # reqs = ''
-        # if uuid == None:
-        #     reqs += ' ** uuid type str required'
-        # if reqs != '':
-        #     raise ValueError(reqs)
-
+        _v = Value(self)
+        _v.stringType = uuid
+        
         this_params = {
             'recent':recent,
             'global':False
         }
 
-        r = self.get('assets/id/{}'.format(uuid), params=this_params)
+        r = self.get('assets/id/{}'.format(_v.value), params=this_params)
         return r.json()
 
     def get_asset(self, asset_name=None, asset_type=None, recent=True, size=100):
@@ -84,25 +112,19 @@ class GlobalInventory(RiskIQAPI):
         :param asset_type: type str, required
         :param asset_name: type str, required
         :param recent: type bool, optional
-        :param global: type bool, optional 
         :param size: type int, optional
         """
-        reqs = ''
-        if asset_type == None:
-            reqs += ' ** asset_type type str required'
-        if asset_name == None:
-            reqs += ' ** asset_name type str'
-        if reqs != '':
-            raise ValueError(reqs)
+        _an = Value(self)
+        _an.stringType = asset_name
 
         this_params = {
-            'name':asset_name,
+            'name':_an.value,
             'recent':recent,
             'global':False,
             'size':size
         }
 
-        _t = Value()
+        _t = Value(self)
         _t.assetType = asset_type
 
         r = self.get('assets/{}'.format(_t.assetType.lower()), params=this_params)
@@ -117,39 +139,28 @@ class GlobalInventory(RiskIQAPI):
         :param asset_type: type str, required
         :param asset_list: type list, required
         """
-        reqs = ''
-        if asset_type == None:
-            reqs += ' ** asset_type type str required'
-        if asset_list == None:
-            reqs += ' ** asset_list type list'
-        if asset_list != None and type(asset_list) != list:
-            reqs += ' ** asset_list must be type list'
-        if reqs != '':
-            raise ValueError(reqs)
+        _al = Value(self)
+        _al.listType = asset_list
 
-        _t = Value()
+        _t = Value(self)
         _t.assetType = asset_type
 
-        if len(asset_list) > 100:
-            full_payload = bundler(endpoint='assets/bulk', payload=asset_list, asset_type=_t.assetType, bundle_size=10)
+        if len(_al.value) > 100:
+            full_payload = bundler(endpoint='assets/bulk', payload=_al.value, asset_type=_t.assetType, bundle_size=10)
             _results = []
             while True:
-                print(len(full_payload))
                 r = bulk_sequencer('assets/bulk', payload=full_payload, asset_type=_t.assetType, context=self.get_context(), max_thread_count=25)
-                print(len(r.get('resultList')))
                 if len(r.get('resultList')) > 0:
                     for h in r.get('resultList'):
                         _results.append(h)
-                print(len(_results))
                 if len(r.get('retryList')) > 0:
-                    print('retrying: {0} hosts'.format(len(r.get('retryList'))))
                     full_payload = bundler(endpoint='assets/bulk', payload=r.get('retryList'), asset_type=_t.assetType, bundle_size=10)
                 else:
                     break
             return _results
         else:
             assets = []
-            for a in asset_list:
+            for a in _al.value:
                 this_asset = {
                     "name": a,
                     "type": _t.assetType
@@ -257,7 +268,7 @@ class GlobalInventory(RiskIQAPI):
         :param recent: type bool, optional (default: True)
         :param size: type int, optional (default: 100)
         """
-        _t = Value()
+        _t = Value(self)
         _t.assetType = asset_type
          
         type_list= ['DOMAIN', 'HOST', 'PAGE', 'IP_BLOCK', 'IP_ADDRESS', 'CONTACT', 'SSL_CERT', 'AS']
@@ -292,7 +303,7 @@ class GlobalInventory(RiskIQAPI):
         https://api.riskiq.net/api/globalinventory/#!/default/get_v1_globalinventory_deltas
 
         :param asset_type: type str, required
-        :param date: type str, required
+        :param date: type str, required (format: YYYY-MM-DD)
         :param delta_range: type int, optional must be 1, 7, or 30
         :param measure: type str, required
         :param brand: type str, optional
@@ -301,21 +312,13 @@ class GlobalInventory(RiskIQAPI):
         :param size: type int, optional
         """
 
-        reqs = ''
-        if asset_type == None:
-            reqs += ' ** asset_type type str required'
-        if date == None:
-            reqs += ' ** date type str required (YYYY-MM-DD)'
-        if measure == None:
-            reqs += ' ** measure type str required, must be ADDED or REMOVED'
-        if delta_range != None and type(delta_range) != int:
-            reqs += ' ** delta_range must be type int) '
-        if delta_range != None and delta_range not in [1,7,30]:
-            reqs += ' ** delta_range must be 1, 7, or 30'
-        if reqs != '':
-            raise ValueError(reqs)
+        _date = Value(self)
+        _date.dateType = date
 
-        _t = Value()
+        _dr = Value(self)
+        _dr.deltaRange = delta_range
+
+        _t = Value(self)
         _t.assetType = asset_type
 
         if tag != None:
@@ -333,21 +336,36 @@ class GlobalInventory(RiskIQAPI):
             _org.organization = organization
             organization = _org.organization
 
-
-        this_params = {
-            'type':_t.assetType,
-            'date':date,
-            'range': delta_range,
-            'measure': measure,
-            'brand': brand,
-            'organization': organization,
-            'tag': tag,
-            'size':size,
-            'mark':'*'
-        }
-
-        r = self.get('deltas',params=this_params)
-        return {'results':r}
+        full_response = []
+        this_mark = '*'
+        count=0
+        while True:
+            this_params = {
+                'type': _t.assetType,
+                'date': _date.value,
+                'range': _dr.value,
+                'measure': measure,
+                'brand': brand,
+                'organization': organization,
+                'tag': tag,
+                'size':size,
+                'mark':this_mark
+            }
+            r = self.get('deltas', params=this_params)
+            if type(r) == dict and 'error' in r.keys():
+                if count >= 5:
+                    raise ValueError('GlobalInventory.get_asset_deltas() failed too many times on the same mark bundle - Try an earlier date and/or a greater delta range')
+                else:
+                    count += 1
+            else:
+                count = 0
+                this_data = r.json()
+                for c in this_data.get('content'):
+                    full_response.append(c)
+                if this_data.get('last') != True:
+                    this_mark = this_data.get('mark')
+                else:
+                    return {'results':full_response}
 
 
     def get_asset_deltas_summary(self, date=None, delta_range=1, brand=None, organization=None, tag=None, size=100):
@@ -361,15 +379,11 @@ class GlobalInventory(RiskIQAPI):
         :param tag: type str, optional
         """
 
-        reqs = ''
-        if date == None:
-            reqs += ' ** date type str required (YYYY-MM-DD)'
-        if delta_range != None and type(delta_range) != int:
-            reqs += ' ** delta_range must be type int) '
-        if delta_range != None and delta_range not in [1,7,30]:
-            reqs += ' ** delta_range must be 1, 7, or 30'
-        if reqs != '':
-            raise ValueError(reqs)
+        _date = Value(self)
+        _date.dateType = date
+
+        _dr = Value(self)
+        _dr.deltaRange = delta_range
         
         if tag != None:
             _tag = Value(context=self.get_context())
@@ -387,18 +401,19 @@ class GlobalInventory(RiskIQAPI):
             organization = _org.organization
 
         this_params = {
-            'date':date,
-            'range': delta_range,
+            'date': _date.value,
+            'range': _dr.value,
             'brand': brand,
             'organization': organization,
-            'tag': tag,
-            'mark':'*'
+            'tag': tag
         }
 
-        r = self.get('deltas/summary',params=this_params)
-        return r.json()
-
-
+        r = self.get('deltas/summary', params=this_params)
+        if type(r) == dict and 'error' in r.keys():
+            raise ValueError(e)
+        else:
+            return r.json()
+        
     def get_tasks(self):
         """
         Retrieve the status of all current tasks
@@ -416,13 +431,10 @@ class GlobalInventory(RiskIQAPI):
 
         :param taskid: type str, required
         """
-        reqs = ''
-        if taskid == None:
-            reqs += '  ** taskid required'
-        if reqs != '':
-            raise ValueError(reqs)
-        this_params={'id':taskid}
-        r = self.get('task/{0}'.format(taskid))
+        _t = Value(self)
+        _t.stringType = taskid
+
+        r = self.get('task/{0}'.format(_t.value))
         return r.json()
     
     def cancel_task(self, taskid=None):
@@ -433,13 +445,10 @@ class GlobalInventory(RiskIQAPI):
 
         :param taskid: type str, required
         """
-        reqs = ''
-        if taskid == None:
-            reqs += '  ** taskid required'
-        if reqs != '':
-            raise ValueError(reqs)
-        this_params={}
-        r = self.post('task/{0}/cancel'.format(taskid),params=this_params)
+        _t = Value(self)
+        _t.stringType = taskid
+
+        r = self.post('task/{0}/cancel'.format(_t.value))
         return r.json()
         
 
@@ -459,7 +468,13 @@ class GlobalInventory(RiskIQAPI):
         """
         ws = Workspace()
         configure_api(ws, context=self.get_context())
-        r = ws.create_tags(tag=tag, color=color)
+
+        _t = Value(self)
+        _t.stringType = tag
+
+        _c = Value(self)
+        _c.stringType = color
+        r = ws.create_tags(tag=_t.value, color=_c.value)
         return r
 
     def get_brands(self):
@@ -478,7 +493,10 @@ class GlobalInventory(RiskIQAPI):
         """
         ws = Workspace()
         configure_api(ws, context=self.get_context())
-        r = ws.create_brands(brand=brand)
+
+        _b = Value(self)
+        _b.stringType = brand
+        r = ws.create_brands(brand=_b.value)
         return r
 
     def get_organizations(self):
@@ -497,7 +515,10 @@ class GlobalInventory(RiskIQAPI):
         """
         ws = Workspace()
         configure_api(ws, context=self.get_context())
-        r = ws.create_organizations(organization=organization)
+
+        _o = Value(self)
+        _o.stringType = organization
+        r = ws.create_organizations(organization=_o.value)
         return r
 
     def add_asset(self, asset_name=None, asset_type=None, asset_name_type_list=None, confirm=False, targetAssetTypes=None):
@@ -510,67 +531,53 @@ class GlobalInventory(RiskIQAPI):
         :param confirm: type bool (optional - default: False) A boolean value to indicate if the asset state should be CONFIRMED into inventory (confirm: true) or as a CANDIDATE asset in inventory (confirm: false or not specified)
         :param targetAssetTypes: type str or type list - A string or array of target asset types to also add to inventory, along with any supplied properties, that are connected to the asset identifiers (e.g. an asset identifier for a PAGE can cascade the properties to all known IPs for that PAGE).
         """
-        reqs = ''
-        if asset_type == None:
-            reqs += ' ** asset_type required [Host, IPAddress, Page, or Domain]'
-        if asset_name == None:
-            reqs += ' ** asset_name required (Can be type str or type list))'
-        if asset_type != None and type(asset_name) != str and type(asset_name) != list:
-            reqs += ' ** asset_name must be be type str or type list'
-        if asset_name != None and asset_type != None and asset_name_type_list != None:
-            reqs += ' ** only asset_name and asset_type or asset_name_type_list is allowed'
-        if asset_name_type_list != None and type(asset_name_type_list) != list:
-            reqs += ' ** asset_name_type_list must be type list - ( ex. [ { "name":asset_name, "type":asset_type}, ... ] )'
-        if type(confirm) != bool:
-            reqs += ' ** confirm must be type bool (optional - default: False)' 
-        if targetAssetTypes != None and type(targetAssetTypes) not in [str, list]:
-            reqs += ' ** targetAssetTypes must be type str or type list'
-        if reqs != '':
-            raise ValueError(reqs)
 
-        newTAT = []
+        _tat = []
         if targetAssetTypes != None:
             if type(targetAssetTypes) == list:
                 for a in targetAssetTypes:
-                    _t = Value()
+                    _t = Value(self)
                     _t.assetType = a
-                    newTAT.append(_t.assetType)
+                    _tat.append(_t.assetType)
             else:
-                _t = Value()
-                _t.assetType = a
-                newTAT.append(_t.assetType)
-        targetAssetTypes = newTAT
+                _t = Value(self)
+                _t.assetType = targetAssetTypes
+                _tat.append(_t.assetType)
+        else:
+            _t = Value(self)
+            _t.assetType = asset_type
+            _tat.append(_t.assetType)
+        targetAssetTypes = _tat
 
         this_asset_list = []
         if asset_name_type_list != None:
-            for a in asset_name_type_list:
-                _t = Value()
+            _antl = Value(self)
+            _antl.assetNameTypeList = asset_name_type_list
+            for a in _antl.value:
+                _t = Value(self)
                 _t.assetType = a['type']
                 this_asset_list.append(
                     {'name':a['nmae'],'type':_t.assetType}
                 )
-        elif type(asset_name) == list:
-            for a in asset_name:
-                _t = Value()
+        elif asset_name != None:
+            _an = Value(self)
+            try:
+                _an.listType = asset_name
+                for a in _an.value:
+                    _t = Value(self)
+                    _t.assetType = asset_type
+                    this_asset_list.append(
+                        {'name':a,'type':_t.assetType}
+                    )
+            except:
+                _an.stringType = asset_name
+                _t = Value(self)
                 _t.assetType = asset_type
-                this_asset_list.append(
-                    {'name':a,'type':_t.assetType}
-                )
+                this_asset_list = [
+                    {'name':_an.value,'type':_t.assetType}
+                ]
         else:
-            _t = Value()
-            _t.assetType = asset_type
-            this_asset_list = [
-                {'name':asset_name,'type':_t.assetType}
-            ]
-
-        this_payload = {
-            'assets' : this_asset_list,
-            'confirm': confirm,
-            'properties': [
-                {'name': 'prioity','value': 'HIGH'}
-            ],
-            'targetAssetTypes': targetAssetTypes
-        }
+            raise ValueError('GlobalInventory.add_asset() must include asset_name or asset_name_type_list')
 
         r=self.post('assets/add', payload=this_payload)
         return r.json()
@@ -584,57 +591,54 @@ class GlobalInventory(RiskIQAPI):
         :param asset_name_type_list: type list - optional ( ex. [{"name":asset_name,"type":asset_type}, ...] )
         :param targetAssetTypes: type str or type list - A string or array of target asset types to also add to inventory, along with any supplied properties, that are connected to the asset identifiers (e.g. an asset identifier for a PAGE can cascade the properties to all known IPs for that PAGE).
         """
-        reqs = ''
-        if asset_type == None and asset_name_type_list == None:
-            reqs += ' ** asset_type required [Host, IPAddress, Page, or Domain]'
-        if asset_name == None and asset_name_type_list == None:
-            reqs += ' ** asset_name required (Can be type str or type list))'
-        if asset_type != None and type(asset_name) != str and type(asset_name) != list:
-            reqs += ' ** asset_name must be be type str or type list'
-        if asset_name != None and asset_type != None and asset_name_type_list != None:
-            reqs += ' ** only asset_name and asset_type or asset_name_type_list is allowed'
-        if asset_name_type_list != None and type(asset_name_type_list) != list:
-            reqs += ' ** asset_name_type_list must be type list - ( ex. [ { "name":asset_name, "type":asset_type}, ... ] )'
-        if targetAssetTypes != None and type(targetAssetTypes) not in [str, list]:
-            reqs += ' ** targetAssetTypes must be type str or type list'
-        if reqs != '':
-            raise ValueError(reqs)
 
-        newTAT = None
+        _tat = []
         if targetAssetTypes != None:
             if type(targetAssetTypes) == list:
-                newTAT = []
                 for a in targetAssetTypes:
-                    _t = Value()
+                    _t = Value(self)
                     _t.assetType = a
-                    newTAT.append(_t.assetType)
+                    _tat.append(_t.assetType)
             else:
-                _t = Value()
-                _t.assetType = a
-                newTAT = _t.assetType
-        targetAssetTypes = newTAT
+                _t = Value(self)
+                _t.assetType = targetAssetTypes
+                _tat.append(_t.assetType)
+        else:
+            _t = Value(self)
+            _t.assetType = asset_type
+            _tat.append(_t.assetType)
+        targetAssetTypes = _tat
+    
 
         this_asset_list = []
         if asset_name_type_list != None:
-            for a in asset_name_type_list:
-                _t = Value()
+            _antl = Value(self)
+            _antl.assetNameTypeList = asset_name_type_list
+            for a in _antl.value:
+                _t = Value(self)
                 _t.assetType = a['type']
                 this_asset_list.append(
                     {'name':a['nmae'],'type':_t.assetType}
                 )
-        elif type(asset_name) == list:
-            for a in asset_name:
-                _t = Value()
+        elif asset_name != None:
+            _an = Value(self)
+            try:
+                _an.listType = asset_name
+                for a in _an.value:
+                    _t = Value(self)
+                    _t.assetType = asset_type
+                    this_asset_list.append(
+                        {'name':a,'type':_t.assetType}
+                    )
+            except:
+                _an.stringType = asset_name
+                _t = Value(self)
                 _t.assetType = asset_type
-                this_asset_list.append(
-                    {'name':a,'type':_t.assetType}
-                )
+                this_asset_list = [
+                    {'name':_an.value,'type':_t.assetType}
+                ]
         else:
-            _t = Value()
-            _t.assetType = asset_type
-            this_asset_list = [
-                {'name':asset_name,'type':_t.assetType}
-            ]
+            raise ValueError('GlobalInventory.remove_asset() must include asset_name or asset_name_type_list')
         
         this_payload = {
             'assets' : this_asset_list,
@@ -645,67 +649,6 @@ class GlobalInventory(RiskIQAPI):
         
         r=self.post('update', payload=this_payload)
         return r.json()
-
-    def update_asset_state(self, asset_name=None, asset_type=None, state=None, asset_name_type_list=None):
-        """
-        # https://api.riskiq.net/api/globalinventory/#!/default/post_v1_globalinventory_update
-
-        :param asset_name: type str (requires asset_type)
-        :param asset_type: type str (requires asset_name)
-        :param state: type str - required
-        :param asset_name_type_list: type list - optional ( ex. [{"name":asset_name,"type":asset_type}, ...] )
-        """
-        reqs = ''
-        if asset_type == None and asset_name_type_list == None:
-            reqs += ' ** asset_type required [Host, IPAddress, Page, or Domain]'
-        if asset_name == None and asset_name_type_list == None:
-            reqs += ' ** asset_name required (Can be type str or type list))'
-        if asset_type != None and type(asset_name) != str and type(asset_name) != list:
-            reqs += ' ** asset_name must be be type str or type list'
-        if asset_name != None and asset_type != None and asset_name_type_list != None:
-            reqs += ' ** only asset_name and asset_type or asset_name_type_list is allowed'
-        if asset_name_type_list != None and type(asset_name_type_list) != list:
-            reqs += ' ** asset_name_type_list must be type list - ( ex. [{"name":asset_name,"type":asset_type}, ...] )'
-        if state == None:
-            reqs += ' ** state required'
-        if reqs != '':
-            raise ValueError(reqs)
-
-        this_asset_list = []
-        if asset_name_type_list != None:
-            for a in asset_name_type_list:
-                _t = Value()
-                _t.assetType = a['type']
-                this_asset_list.append(
-                    {'name':a['nmae'],'type':_t.assetType}
-                )
-        elif type(asset_name) == list:
-            for a in asset_name:
-                _t = Value()
-                _t.assetType = asset_type
-                this_asset_list.append(
-                    {'name':a,'type':_t.assetType}
-                )
-        else:
-            _t = Value()
-            _t.assetType = asset_type
-            this_asset_list = [
-                {'name':asset_name,'type':_t.assetType}
-            ]
-        
-        this_s = Value()
-        this_s.state = state
-        
-        this_payload = {
-            'assets' : this_asset_list,
-            'properties' : [
-                {'name':'state','value':this_s.state}
-            ]
-        }
-        
-        r=self.post('update', payload=this_payload)
-        return r.json()
-
 
     def update_asset(self, action=None, asset_name=None, asset_type=None, update_type=None, update_value=None, failOnError=False):
         """
@@ -718,31 +661,15 @@ class GlobalInventory(RiskIQAPI):
         :param update_value: type str, required
         :param failOnError: type bool, optional 
         """
-        reqs = ''
+        _a = Value(self)
 
-        if action == None:
-            reqs += '  ** action required (must be add or remove)'
-        if asset_type == None:
-            reqs += ' ** asset_type required'
-        if asset_name == None:
-            reqs += ' ** asset_name required (Can be type str or type list))'
-        if asset_type != None and type(asset_name) != str and type(asset_name) != list:
-            reqs += ' ** asset_name must be be type str or type list'
-        if update_type == None:
-            reqs += ' ** update_type required (tag, brand, or organization)'
-        if update_value == None:
-            reqs += ' ** update_value required'
-        if reqs != '':
-            raise ValueError(reqs)
-
-        _a = Value()
         _a.action = action
 
-        _aval = Value()
+        _aval = Value(self)
         _aval.assetType = asset_type
         _aval.value = asset_name
        
-        _uval = Value()
+        _uval = Value(self)
         _uval.updateType = update_type
         if _uval.updateType == 'state':
             _uval.state = update_value
@@ -824,25 +751,21 @@ def bulk_update(self, payload=None, params=None, action=None, asset_name=None, a
 
 
 def get_asset_dataset(self, this_dataset, asset_name=None, asset_type=None, recent=True, size=100):
-    reqs = ''
-    if asset_type == None:
-        reqs += ' ** asset_type type str required'
-    if asset_name == None:
-        reqs += ' ** asset_name type str required'
-    if reqs != '':
-        raise ValueError(reqs)
-
-    _t = Value()
+    _an = Value(self)
+    _an.stringType = asset_name
+    
+    _t = Value(self)
     _t.assetType = asset_type
 
     this_params = {
-        'name':asset_name,
+        'name':_an.value,
         'global':False,
         'size':size,
         'mark':'*'
     }
     r = self.get('assets/{0}/{1}'.format(_t.assetType.lower(), this_dataset), params=this_params)
     return r
+
 
 def bundler(endpoint=None, payload=None, asset_type=None, bundle_size=10):
     if endpoint == 'assets/bulk':
@@ -902,6 +825,3 @@ def get_data(data=None, context=None, i=None, qsize=None, _resultList=None, _ret
     else:
         for h in r.json():
             _resultList.append(h)
-    print('_retryList size: {0}'.format(len(_retryList)))
-    print('_resultList size: {0}'.format(len(_resultList)))
-        

@@ -8,6 +8,6 @@ setup(name='riqsolutions',
       license='MIT',
       packages=find_packages(exclude=['tests*']),
       install_requires=[
-          'requests',
+          'requests','lxml','xmltodict'
       ],
       zip_safe=False)
