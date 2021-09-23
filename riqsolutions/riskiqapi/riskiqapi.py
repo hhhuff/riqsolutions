@@ -14,10 +14,16 @@ from logging.handlers import RotatingFileHandler
 import inspect
 import re
 from time import perf_counter
+import os.path
+
+_f = os.path.realpath(__file__).replace('riskiqapi.py','log/riqsolutions.log')
+if os.path.exists(_f) == False:
+    with open(_f, 'w+') as f:
+        f.write('RiskIQ Solutions API Library Activity Log')
 
 log_formatter = logging.Formatter('%(asctime)s %(levelname)s - %(module)s:%(funcName)s(): %(message)s')
 my_handler = RotatingFileHandler(
-    os.path.realpath(__file__).replace('riskiqapi.py','log/riqsolutions.log'), 
+    _f, 
     mode='a', 
     maxBytes=5*1024*1024, 
     backupCount=2, 
@@ -29,8 +35,6 @@ my_handler.setLevel(logging.INFO)
 logger = logging.getLogger('root')
 logger.setLevel(logging.INFO)
 logger.addHandler(my_handler)
-logger.info('RiskIQ Solutions API Library')
-
 
 class RiskIQAPI():
     def __init__(self, api_token=None, api_key=None, context=None, url_prefix='', hostname='', timeout=(5.0,30.0), retries=2, backoff=0.1, threadindex=None):

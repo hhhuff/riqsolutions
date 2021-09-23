@@ -22,6 +22,7 @@ Source code can be found on github `Here <https://github.com/philcowger/riqsolut
    query
    facet
    comparator
+   value
 
 
 
