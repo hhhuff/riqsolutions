@@ -1,0 +1,15 @@
+======
+Values
+======
+
+
+Values Module
+^^^^^^^^^^^^^
+
+.. automodule:: riqsolutions
+    :noindex:
+
+
+.. autoclass:: riqsolutions.riskiqapi.Values
+    :members:
+    :inherited-members:
