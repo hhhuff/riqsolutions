@@ -33,10 +33,9 @@ logger.info('RiskIQ Solutions API Library')
 
 
 class RiskIQAPI():
-    def __init__(self, api_token=None, api_key=None, proxy=None, context=None, url_prefix='', hostname='', timeout=(5.0,30.0), retries=2, backoff=0.1, threadindex=None):
+    def __init__(self, api_token=None, api_key=None, context=None, url_prefix='', hostname='', timeout=(5.0,30.0), retries=2, backoff=0.1, threadindex=None):
         self._token = api_token
         self._key = api_key
-        self._proxy = proxy
         self._context = context
         self._prefix = url_prefix
         self._hostname = hostname
@@ -59,10 +58,9 @@ class RiskIQAPI():
             'User-Agent': 'RiskIQSolutions'
         }
 
-    def configure(self, api_token, api_key, proxy, context):
+    def configure(self, api_token, api_key, context):
         self._token = api_token
         self._key = api_key
-        self._proxy = proxy
         self._context = context
 
     def _request(self, method, endpoint, payload={}, params={}, xml=None, thread_data=None):

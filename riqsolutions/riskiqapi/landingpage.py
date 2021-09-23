@@ -20,11 +20,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 class LandingPage(RiskIQAPI):
-    def __init__(self, api_token=None, api_key=None, proxy=None, context=None):
+    def __init__(self, api_token=None, api_key=None, context=None):
         super().__init__(
             api_token, 
             api_key, 
-            proxy,
             context,
             url_prefix='v1/landingPage', 
             hostname='ws.riskiq.net')

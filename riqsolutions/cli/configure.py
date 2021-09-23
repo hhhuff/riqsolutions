@@ -1,6 +1,6 @@
 from os.path import expanduser, join, exists
 import configparser
-from getpass import getpass, getuser
+from getpass import getpass
 
 
 CONFIGFILE_DEFAULT_NAME = '.riqconfig'
@@ -15,10 +15,6 @@ def add_subparser(subparsers):
     parser.add_argument('--api_key',
         default=None,
         help='API private key (optional; will prompt if not provided'
-    )
-    parser.add_argument('--proxy',
-        default=None,
-        help='Proxy to be used for http requests'
     )
     parser.add_argument('--context', 
         default='DEFAULT',
@@ -55,11 +51,6 @@ def main(args):
         print('ERROR: api_token and api_key are both required to complete configuration')
         return 1
     
-    if not args.proxy:
-        proxy = ''
-    else:
-        proxy = args.proxy
-    
     if not args.context:
         context = 'DEFAULT'
     else:
@@ -71,7 +62,6 @@ def main(args):
     config[args.context] = {
         'api_token': api_token,
         'api_key': api_key,
-        'proxy': proxy,
         'context': context
     }
     try:
@@ -81,5 +71,3 @@ def main(args):
         print('ERROR: cannot write config file - {}'.format(err))
         return 1
 
-
-    
