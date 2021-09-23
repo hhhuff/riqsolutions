@@ -2,11 +2,10 @@ from .riskiqapi import RiskIQAPI
 from .values import Value
 
 class Workspace(RiskIQAPI):
-    def __init__(self, api_token=None, api_key=None, proxy=None, context=None):
+    def __init__(self, api_token=None, api_key=None, context=None):
         super().__init__(
             api_token, 
             api_key, 
-            proxy,
             context,
             url_prefix='v0/workspace', 
             hostname='api.riskiq.net')

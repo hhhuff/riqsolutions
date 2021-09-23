@@ -15,11 +15,10 @@ class GlobalInventory(RiskIQAPI):
     """
     Represents a request to the Global Inventory API
     """
-    def __init__(self, api_token=None, api_key=None, proxy=None, context=None):
+    def __init__(self, api_token=None, api_key=None, context=None):
         super().__init__(
             api_token, 
             api_key, 
-            proxy,
             context,
             url_prefix='v1/globalinventory', 
             hostname='api.riskiq.net')
@@ -578,6 +577,15 @@ class GlobalInventory(RiskIQAPI):
                 ]
         else:
             raise ValueError('GlobalInventory.add_asset() must include asset_name or asset_name_type_list')
+
+        this_payload = {
+            'assets' : this_asset_list,
+            'properties' : [
+                {'name':'removedState','value':'DISMISSED'}
+            ],
+            'confirm': confirm,
+            'targetAssetTypes': targetAssetTypes
+        }
 
         r=self.post('assets/add', payload=this_payload)
         return r.json()
