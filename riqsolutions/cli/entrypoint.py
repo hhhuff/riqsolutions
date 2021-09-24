@@ -10,7 +10,13 @@ parser = argparse.ArgumentParser(
 subparsers = parser.add_subparsers(
     title='commands', 
     description='list of valid subcommands',
-    help='Specifiy a subcommand to see valid options'
+    help="""
+Specifiy subcommands when configuring:
+    --api_token     API token (optional; will prompt if not provided
+    --api_key       API private key (optional; will prompt if not provided
+    --context       Configuration context (optional; use to activate a configuration for a given environment or project)
+    --update        Set flag to update existing configfile if present
+"""
 )
 
 configure.add_subparser(subparsers)

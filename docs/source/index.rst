@@ -23,6 +23,7 @@ Source code can be found on github `Here <https://github.com/philcowger/riqsolut
    facet
    comparator
    value
+   workspace
 
 
 

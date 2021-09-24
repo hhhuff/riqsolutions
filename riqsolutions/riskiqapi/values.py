@@ -1,3 +1,4 @@
+"""Values Module for input validation"""
 from .riskiqapi import RiskIQAPI
 import datetime
 
@@ -22,7 +23,11 @@ _DATETIMEFORMAT_ = '%Y-%m-%d %H:%M:%S'
 
 
 class Value(RiskIQAPI):
+    """
+    Class created to represent and manage all the differrent values and types being used with the RiskIQ Solutions Python API Library
 
+    ** This is an Internal class and not intended to be called by the user **
+    """
     def __init__(self, gi_api=None, value=None):
         self._gi_api = gi_api
         # common 
@@ -34,6 +39,7 @@ class Value(RiskIQAPI):
         self._datetimeType = None
         self._deltaRange = None
         self._domainExpiration = None
+        self._id = None
         self._portLastSeen = None
         self._portState = None
         self._priority = None
@@ -169,14 +175,14 @@ class Value(RiskIQAPI):
             for t in _tag:
                 for k, v in self._tagList.items():
                     if t == k:
-                        this_tag.append(v)
+                        this_tag.append({k:v})
             self._value = this_tag
             self._tag = this_tag
         else:
             for k, v in self._tagList.items():
                 if _tag == k:
-                    self._value = v
-                    self._tag = v
+                    self._value = {k:v}
+                    self._tag = {k:v}
 
     @property
     def brand(self):
@@ -210,14 +216,14 @@ class Value(RiskIQAPI):
             for b in _brand:
                 for k, v in self._brandList.items():
                     if b == k:
-                        this_brand.append(v)
+                        this_brand.append({k:v})
             self._value = this_brand
             self._brand = this_brand
         else:
             for k, v in self._brandList.items():
                 if _brand == k:
-                    self._value = v
-                    self._brand = v
+                    self._value = {k:v}
+                    self._brand = {k:v}
 
     @property
     def organization(self):
@@ -233,7 +239,7 @@ class Value(RiskIQAPI):
     @organization.setter
     def organization(self, _org):
         if self._orgList is None:
-            self._orgList = get_orgs(self)
+            self._orgList = get_organizations(self)
         
         if type(_org) is not list and type(_org) is not str:
             raise TypeError('organization must be type str or type list')
@@ -251,14 +257,14 @@ class Value(RiskIQAPI):
             for o in _org:
                 for k, v in self._orgList.items():
                     if o == k:
-                        this_org.append(v)
+                        this_org.append({k:v})
             self._value = this_org
             self._org = this_org
         else:
             for k, v in self._orgList.items():
                 if _org == k:
-                    self._value = v
-                    self._org = v
+                    self._value = {k:v}
+                    self._org = {k:v}
 
     @property
     def dateType(self):
@@ -297,6 +303,20 @@ class Value(RiskIQAPI):
             self._value = datetimeType
         except ValueError:
             raise ValueError("Incorrect datetime format, should be YYYY-MM-DD HH:MM:SS")
+
+    @property
+    def id(self):
+        """
+        Returns current id
+        Set with Value().id = yourid
+
+        :returns: self._id
+        """
+        return self._id
+    
+    @id.setter
+    def id(self, _id):
+        self._id = _id
 
     @property
     def value(self):

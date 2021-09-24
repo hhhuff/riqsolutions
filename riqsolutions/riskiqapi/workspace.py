@@ -1,13 +1,21 @@
+"""Workspace Module for the RiskIQ Solutions Python API Library"""
+
 from .riskiqapi import RiskIQAPI
 from .values import Value
 
 class Workspace(RiskIQAPI):
-    def __init__(self, api_token=None, api_key=None, context=None):
+    """
+    Represents a request to the Workspace Management API
+    https://api.riskiq.net/api/workspace/
+
+    ** This is an Internal class and not intended to be called by the user **
+    """
+    def __init__(self, api_token=None, api_key=None, context=None, url_prefix='v0/workspace'):
         super().__init__(
             api_token, 
             api_key, 
             context,
-            url_prefix='v0/workspace', 
+            url_prefix=url_prefix, 
             hostname='api.riskiq.net')
     
 
@@ -17,29 +25,25 @@ class Workspace(RiskIQAPI):
 
     def create_tags(self, tag=None, color=None):
         """
+        Create new inventory tag(s).  Can submit single tag or a list of tags. Can only submit a single color.
         https://api.riskiq.net/api/workspace/#!/default/post_v0_workspace_tag
-        Will only create Inventory Tags
-        tag: type(str) or type(list) - required 
-        color: type(str) - required
+
+        :param tag: type str, required
+        :param color: type str, required
         """
-        colors = ['yellow', 'green', 'orange', 'red', 'purple', 'green-2', 'dark-gray', 'blue', 'black', 'white', 'indigo', 'gray']
 
-        reqs = ''
-        if tag is None:
-            reqs += ' ** tag type(str) or type(list) required'
-        if type(tag) != str and type(tag) != list:
-            reqs += ' ** tag must be type(str) or type(list)'
-        if color is None:
-            reqs += ' ** must include color' 
-        if reqs != '':
-            raise ValueError(reqs)
+        _t = Value(self)
+        try:
+            _t.stringType = tag
+        except:
+            _t.listType = tag
 
-        _c = Value()
-        _c.color = color 
+        _c = Value(self)
+        _c.color = color
 
         this_tags = []
-        if type(tag) is list:
-            for t in tag:
+        if type(_t.value) is list:
+            for t in _t.value:
                 this_t = {
                     'name': t,
                     'color': _c.color,
@@ -48,7 +52,7 @@ class Workspace(RiskIQAPI):
                 this_tags.append(this_t)
         else:
             this_tags = [{
-                'name': tag,
+                'name': _t.value,
                 'color': _c.color,
                 'type': 'INVENTORY'
             }]
@@ -60,42 +64,38 @@ class Workspace(RiskIQAPI):
         r = self.post('tag', payload=this_payload)
         return r.json()
 
-    def delete_tags(self, tag_id=None):
+    def delete_tags(self, tag=None, gi_api=None):
         """
+        Delete inventory tag(s).  Can submit single tag/tag_id or a list of tags/tag_ids.
         https://api.riskiq.net/api/workspace/#!/default/delete_v0_workspace_tag
-        tag_id: type(dict) or type(list of dicts) - required - format {tag_id type(int):tag_name type(str)}
-            example: {123456:'example_tag'} or [{123456:'example_tag'},{654321:'example_tag_2'}]
-        """
 
-        reqs = ''
-        if tag_id is None:
-            reqs += ' ** tag_id: type(dict) or type(list of dicts) - required - format {tag_id type(int):tag_name type(str)}'
-        if tag_id is not None and type(tag_id) is not dict and type(tag_id) is not list:
-            reqs += ' ** tag_id must be type(dict) or type(list)'
-        if reqs != '':
-            raise ValueError(reqs)
+        :param tag: type str/list, optional
+        """
 
         this_tags = []
-        if type(tag_id) is list:
-            for index in range(len(tag_id)):
+        _t = Value(gi_api)
+        _t.tag = tag
+        if type(_t.value) is list:
+            for t in _t.value:
+                for k,v in t.items():
+                    this_t = {
+                            'name':k,
+                            'id':v
+                        }
+                    this_tags.append(this_t)
+        else:
+            for k,v in _t.value.items():
                 this_t = {
-                    'id': list(tag_id[index].keys())[0],
-                    'name': list(tag_id[index].values())[0]
+                    'name':k,
+                    'id':v
                 }
                 this_tags.append(this_t)
-        else:
-            this_t = {
-                'id': list(tag_id.keys())[0],
-                'name': list(tag_id.values())[0]
-            }
-            this_tags.append(this_t)
-
+            
         this_payload = {
             'tags': this_tags
         }
-
         r = self.delete('tag', payload=this_payload)
-        return r.status_code
+        return r.json()
 
     def get_brands(self):
         r = self.get('brand')
@@ -103,69 +103,69 @@ class Workspace(RiskIQAPI):
     
     def create_brands(self, brand=None):
         """
+        Create new inventory brand(s).  Can submit single brand or a list of brands
         https://api.riskiq.net/api/workspace/#!/default/post_v0_workspace_brand
-        brand: type(str) or type(list) - required
+
+        :param brand: type str/list, required
         """
-        reqs = ''
-        if brand is None:
-            reqs += ' ** brand type(str) or type(list) required'
-        if type(brand) != str and type(brand) != list:
-            reqs += ' ** brand must be type(str) or type(list)'
-        if reqs != '':
-            raise ValueError(reqs)
+
+        _b = Value(self)
+        try:
+            _b.stringType = brand
+        except:
+            _b.listType = brand
 
         this_brands = []
-        if brand is not None and type(brand) is list:
-            for b in brand:
+        if type(_b.value) is list:
+            for b in _b.value:
                 this_b = {
                     'name': b
                 }
                 this_brands.append(this_b)
         else:
-            this_brands = [{'name':brand}]
+            this_brands = [{
+                'name': _b.value
+            }]
 
         this_payload = {
             'brands': this_brands
         }
+
         r = self.post('brand', payload=this_payload)
         return r.json()
 
-    def delete_brands(self, brand_id=None):
+    def delete_brands(self, brand=None, gi_api=None):
         """
-        https://api.riskiq.net/api/workspace/#!/default/delete_v0_workspace_tag
-        brand_id: type(dict) or type(list of dicts) - required - format {brand_id type(int):brand_name type(str)}
-            example: {123456:'example_brand'} or [{123456:'example_brand'},{654321:'example_brand_2'}]
+        Delete inventory brand(s).  Can submit single brand/brand_id or a list of brands/brand_ids.
+        https://api.riskiq.net/api/workspace/#!/default/delete_v0_workspace_brand
 
+        :param brand: type str/list, optional
         """
-        reqs = ''
-        if brand_id is None:
-            reqs += ' ** brand_id: type(dict) or type(list of dicts) - required - format {brand_id type(int):brand_name type(str)}'
-        if brand_id is not None and type(brand_id) is not dict and type(brand_id) is not list:
-            reqs += ' ** brand_id must be type(dict) or type(list)'
-        if reqs != '':
-            raise ValueError(reqs)
 
         this_brands = []
-        if type(brand_id) is list:
-            for index in range(len(brand_id)):
+        _b = Value(gi_api)
+        _b.brand = brand
+        if type(_b.value) is list:
+            for b in _b.value:
+                for k,v in b.items():
+                    this_b = {
+                            'name':k,
+                            'id':v
+                        }
+                    this_brands.append(this_b)
+        else:
+            for k,v in _b.value.items():
                 this_b = {
-                    'id': list(brand_id[index].keys())[0],
-                    'name': list(brand_id[index].values())[0]
+                    'name':k,
+                    'id':v
                 }
                 this_brands.append(this_b)
-        else:
-            this_b = {
-                'id': list(brand_id.keys())[0],
-                'name': list(brand_id.values())[0]
-            }
-            this_brands.append(this_b)
-
+            
         this_payload = {
             'brands': this_brands
         }
-
         r = self.delete('brand', payload=this_payload)
-        return r.status_code
+        return r.json()
 
     def get_organizations(self):
         r = self.get('organization')
@@ -173,66 +173,66 @@ class Workspace(RiskIQAPI):
 
     def create_organizations(self, organization=None):
         """
+        Create new inventory organization(s).  Can submit single organization or a list of organizations
         https://api.riskiq.net/api/workspace/#!/default/post_v0_workspace_organization
-        organization: type(str) or type(list) - required 
+
+        :param organization: type str/list, required
         """
-        reqs = ''
-        if organization is None:
-            reqs += ' ** organization type(str) or type(list) required'
-        if type(organization) != str and type(organization) != list:
-            reqs += ' ** organization must be type(str) or type(list)'
-        if reqs != '':
-            raise ValueError(reqs)
+
+        _o = Value(self)
+        try:
+            _o.stringType = organization
+        except:
+            _o.listType = organization
 
         this_organizations = []
-        if type(organization) is list:
-            for o in organization:
+        if type(_o.value) is list:
+            for o in _o.value:
                 this_o = {
-                    'name': o
+                    'name': b
                 }
                 this_organizations.append(this_o)
         else:
-            this_organizations = [{'name':organization}]
+            this_organizations = [{
+                'name': _o.value
+            }]
 
         this_payload = {
             'organizations': this_organizations
         }
+
         r = self.post('organization', payload=this_payload)
         return r.json()
 
-    def delete_organizations(self, org_id=None):
+    def delete_organizations(self, organization=None, gi_api=None):
         """
-        https://api.riskiq.net/api/workspace/#!/default/delete_v0_workspace_tag
-        org_id: type(dict) or type(list of dicts) - required - format {org_id type(int):org_name type(str)}
-            example: {123456:'example_org'} or [{123456:'example_org'},{654321:'example_org_2'}]
+        Delete inventory organization(s).  Can submit single organization/organization_id or a list of organizations/organization_ids.
+        https://api.riskiq.net/api/workspace/#!/default/delete_v0_workspace_organization
 
+        :param organization: type str/list, optional
         """
-        reqs = ''
-        if org_id is None:
-            reqs += ' ** org_id: type(dict) or type(list of dicts) - required - format {org_id type(int):org_name type(str)}'
-        if org_id is not None and type(org_id) is not dict and type(org_id) is not list:
-            reqs += ' ** org_id must be type(dict) or type(list)'
-        if reqs != '':
-            raise ValueError(reqs)
 
-        this_orgs = []
-        if type(org_id) is list:
-            for index in range(len(org_id)):
-                this_b = {
-                    'id': list(org_id[index].keys())[0],
-                    'name': list(org_id[index].values())[0]
-                }
-                this_orgs.append(this_b)
+        this_organizations = []
+        _o = Value(gi_api)
+        _o.organization = organization
+        if type(_o.value) is list:
+            for o in _o.value:
+                for k,v in o.items():
+                    this_o = {
+                            'name':k,
+                            'id':v
+                        }
+                    this_organizations.append(this_o)
         else:
-            this_b = {
-                'id': list(org_id.keys())[0],
-                'name': list(org_id.values())[0]
-            }
-            this_orgs.append(this_b)
-
+            for k,v in _o.value.items():
+                this_o = {
+                    'name':k,
+                    'id':v
+                }
+                this_organizations.append(this_o)
+            
         this_payload = {
-            'organizations': this_orgs
+            'organizations': this_organizations
         }
-
         r = self.delete('organization', payload=this_payload)
-        return r.status_code
+        return r.json()

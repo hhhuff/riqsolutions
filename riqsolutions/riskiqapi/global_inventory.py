@@ -14,6 +14,7 @@ QUEUE_LOCK = threading.Lock()
 class GlobalInventory(RiskIQAPI):
     """
     Represents a request to the Global Inventory API
+    https://api.riskiq.net/api/globalinventory/
     """
     def __init__(self, api_token=None, api_key=None, context=None):
         super().__init__(
@@ -457,10 +458,11 @@ class GlobalInventory(RiskIQAPI):
         """
         r = self.get('tags')
         return r.json()
-    
+
     def create_tags(self, tag=None, color=None):
         """
-        Create a new inventory tag
+        Create new inventory tag(s).  Can submit single tag or a list of tags. Can only submit a single color.
+        https://api.riskiq.net/api/workspace/#!/default/post_v0_workspace_tag
 
         :param tag: type str, required
         :param color: type str, required
@@ -468,12 +470,20 @@ class GlobalInventory(RiskIQAPI):
         ws = Workspace()
         configure_api(ws, context=self.get_context())
 
-        _t = Value(self)
-        _t.stringType = tag
+        r = ws.create_tags(tag=tag, color=color)
+        return r
 
-        _c = Value(self)
-        _c.stringType = color
-        r = ws.create_tags(tag=_t.value, color=_c.value)
+    def delete_tags(self, tag=None):
+        """
+        Delete inventory tag(s).  Can submit single tag/tag_id or a list of tags/tag_ids.
+        https://api.riskiq.net/api/workspace/#!/default/delete_v0_workspace_tag
+
+        :param tag: type str/list, required
+        """
+        ws = Workspace()
+        configure_api(ws, context=self.get_context())
+
+        r = ws.delete_tags(tag=tag, gi_api=self)
         return r
 
     def get_brands(self):
@@ -485,17 +495,29 @@ class GlobalInventory(RiskIQAPI):
     
     def create_brands(self, brand=None):
         """
-        Create a new brand tag
+        Create new inventory brand(s).  Can submit single brand or a list of brands
+        https://api.riskiq.net/api/workspace/#!/default/post_v0_workspace_brand
 
-        :param brand: type str, required
-        :param color: type str, required
+        :param brand: type str/list, required
         """
         ws = Workspace()
         configure_api(ws, context=self.get_context())
 
-        _b = Value(self)
-        _b.stringType = brand
-        r = ws.create_brands(brand=_b.value)
+        r = ws.create_brands(brand=brand)
+        return r
+
+    def delete_brands(self, brand=None):
+        """
+        Delete brand tag(s).  Can submit single brand/brand_id or a list of brands/brand_ids.
+        https://api.riskiq.net/api/workspace/#!/default/delete_v0_workspace_brand
+
+        :param brand: type str/list, optional
+        :parag brand_id: type str/list, optional
+        """
+        ws = Workspace()
+        configure_api(ws, context=self.get_context())
+
+        r = ws.delete_brands(brand=brand, gi_api=self)
         return r
 
     def get_organizations(self):
@@ -507,17 +529,30 @@ class GlobalInventory(RiskIQAPI):
 
     def create_organizations(self, organization=None):
         """
-        Create a new organization tag
+        Create new inventory organization(s).  Can submit single organization or a list of organizations
+        https://api.riskiq.net/api/workspace/#!/default/post_v0_workspace_organization
 
-        :param organization: type str, required
-        :param color: type str, required
+        :param organization: type str/list, required
         """
         ws = Workspace()
         configure_api(ws, context=self.get_context())
 
-        _o = Value(self)
-        _o.stringType = organization
-        r = ws.create_organizations(organization=_o.value)
+        r = ws.create_organizations(organization=organization)
+        return r
+    
+    def delete_organizations(self, organization=None):
+        """
+        Delete organization tag(s).  Can submit single organization/organization_id or a list of organizations/organization_ids.
+        https://api.riskiq.net/api/workspace/#!/default/delete_v0_workspace_organization
+
+        :param organization: type str/list, optional
+        :parag organization_id: type str/list, optional
+        """
+
+        ws = Workspace()
+        configure_api(ws, context=self.get_context())
+
+        r = ws.delete_organizations(organization=organization, gi_api=self)
         return r
 
     def add_asset(self, asset_name=None, asset_type=None, asset_name_type_list=None, confirm=False, targetAssetTypes=None):
