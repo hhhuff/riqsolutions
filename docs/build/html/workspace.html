@@ -1,0 +1,202 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Workspace &#8212; riskiqsolutions 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Value" href="value.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="workspace">
+<h1>Workspace<a class="headerlink" href="#workspace" title="Permalink to this headline">¶</a></h1>
+<section id="workspace-module">
+<h2>Workspace Module<a class="headerlink" href="#workspace-module" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.Workspace">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">riqsolutions.riskiqapi.</span></span><span class="sig-name descname"><span class="pre">Workspace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'v0/workspace'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.Workspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a request to the Workspace Management API
+<a class="reference external" href="https://api.riskiq.net/api/workspace/">https://api.riskiq.net/api/workspace/</a></p>
+<p>** This is an Internal class and not intended to be called by the user **</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.Workspace.create_brands">
+<span class="sig-name descname"><span class="pre">create_brands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">brand</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.Workspace.create_brands" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new inventory brand(s).  Can submit single brand or a list of brands
+<a class="reference external" href="https://api.riskiq.net/api/workspace/#!/default/post_v0_workspace_brand">https://api.riskiq.net/api/workspace/#!/default/post_v0_workspace_brand</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>brand</strong> – type str/list, required</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.Workspace.create_organizations">
+<span class="sig-name descname"><span class="pre">create_organizations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">organization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.Workspace.create_organizations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new inventory organization(s).  Can submit single organization or a list of organizations
+<a class="reference external" href="https://api.riskiq.net/api/workspace/#!/default/post_v0_workspace_organization">https://api.riskiq.net/api/workspace/#!/default/post_v0_workspace_organization</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>organization</strong> – type str/list, required</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.Workspace.create_tags">
+<span class="sig-name descname"><span class="pre">create_tags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.Workspace.create_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new inventory tag(s).  Can submit single tag or a list of tags. Can only submit a single color.
+<a class="reference external" href="https://api.riskiq.net/api/workspace/#!/default/post_v0_workspace_tag">https://api.riskiq.net/api/workspace/#!/default/post_v0_workspace_tag</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tag</strong> – type str, required</p></li>
+<li><p><strong>color</strong> – type str, required</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.Workspace.delete_brands">
+<span class="sig-name descname"><span class="pre">delete_brands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">brand</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gi_api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.Workspace.delete_brands" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete inventory brand(s).  Can submit single brand/brand_id or a list of brands/brand_ids.
+<a class="reference external" href="https://api.riskiq.net/api/workspace/#!/default/delete_v0_workspace_brand">https://api.riskiq.net/api/workspace/#!/default/delete_v0_workspace_brand</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>brand</strong> – type str/list, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.Workspace.delete_organizations">
+<span class="sig-name descname"><span class="pre">delete_organizations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">organization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gi_api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.Workspace.delete_organizations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete inventory organization(s).  Can submit single organization/organization_id or a list of organizations/organization_ids.
+<a class="reference external" href="https://api.riskiq.net/api/workspace/#!/default/delete_v0_workspace_organization">https://api.riskiq.net/api/workspace/#!/default/delete_v0_workspace_organization</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>organization</strong> – type str/list, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="riqsolutions.riskiqapi.Workspace.delete_tags">
+<span class="sig-name descname"><span class="pre">delete_tags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gi_api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#riqsolutions.riskiqapi.Workspace.delete_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete inventory tag(s).  Can submit single tag/tag_id or a list of tags/tag_ids.
+<a class="reference external" href="https://api.riskiq.net/api/workspace/#!/default/delete_v0_workspace_tag">https://api.riskiq.net/api/workspace/#!/default/delete_v0_workspace_tag</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>tag</strong> – type str/list, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">riskiqsolutions</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="globalinventory.html">Global Inventory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="query.html">Query</a></li>
+<li class="toctree-l1"><a class="reference internal" href="facet.html">Facet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="comparator.html">Comparator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="value.html">Value</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Workspace</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#workspace-module">Workspace Module</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="value.html" title="previous chapter">Value</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, RiskIQ, Inc..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/workspace.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

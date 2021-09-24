@@ -20,9 +20,6 @@ def add_subparser(subparsers):
         default='DEFAULT',
         help='Configuration context (optional; use to activate a configuration for a given environment or project)'
     )
-    parser.add_argument('--configfile',
-        help='Path to config file; defaults to {} in users home directory'.format(CONFIGFILE_DEFAULT_NAME)
-    )
     parser.add_argument('--update',
         default=False,
         action='store_true',
@@ -31,18 +28,18 @@ def add_subparser(subparsers):
     parser.set_defaults(func=main)
 
 def main(args):
-    if not args.configfile:
-        filepath = join(expanduser('~'), CONFIGFILE_DEFAULT_NAME)
-    else:
-        filepath = args.configfile
+   
+    filepath = join(expanduser('~'), CONFIGFILE_DEFAULT_NAME)
     if exists(filepath) and not args.update:
         print('ERROR: found existing config file at {} (pass --update to change file)'.format(filepath))
         return 1
     print('Writing config for context "{}" to {}'.format(args.context, filepath))
+
     if not args.api_token:
         api_token = getpass(' API Token: ')
     else:
         api_token = args.api_token
+
     if not args.api_key:
         api_key = getpass(' API Key: ')
     else:
