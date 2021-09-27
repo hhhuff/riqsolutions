@@ -25,7 +25,7 @@ class GlobalInventory(RiskIQAPI):
             hostname='api.riskiq.net')
     
 
-    def inventory_search(self, query: json=None, savedSearchID=None, savedSearchName=None, size: int=100, idsOnly=False):
+    def inventory_search(self, query=None, savedSearchID=None, savedSearchName=None, size: int=500, idsOnly=False):
         """
         Perform an inventory search by submitting json which was generated from the UI.
 
@@ -39,32 +39,30 @@ class GlobalInventory(RiskIQAPI):
 
         :returns: {'results':r}
         """
-        this_params = {
-            'global':False,
-            'size':size,
-            'mark':this_mark,
-            'idsOnly':idsOnly
-        }
-
-        this_payload = None
+        _v = Value(self)
+        _s = Value(self)
         if query != None:
-            _v = Value(self)
-            _v.typeDict = query
-            this_payload = _v.value
+            _v.dictType = query
+            this_payload = _v.dictType
         elif savedSearchID != None:
-            _s = Value(self)
             _s.stringType = savedSearchID
-            this_params['savedSearchID'] = _s.value
         elif savedSearchName != None:
-            _s = Value(self)
             _s.stringType = savedSearchName
-            this_params['savedSearchName'] = _s.value
 
         full_response = []
         this_mark = '*'
         count=0
         while True:
-            this_params['mark'] = this_mark
+            this_params = {
+                'global':False,
+                'size':size,
+                'mark':this_mark,
+                'idsOnly':idsOnly
+            }
+            if savedSearchID != None:
+                this_params['savedSearchID'] = _s.value
+            elif savedSearchName != None:
+                this_params['savedSearchName'] = _s.value
             r = self.post('search', payload=this_payload, params=this_params)
             if type(r) == dict and 'error' in r.keys():
                 if count >= 5:
