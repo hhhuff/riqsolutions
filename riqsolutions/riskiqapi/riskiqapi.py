@@ -37,7 +37,7 @@ logger.setLevel(logging.INFO)
 logger.addHandler(my_handler)
 
 class RiskIQAPI():
-    def __init__(self, api_token=None, api_key=None, context=None, url_prefix='', hostname='', timeout=(5.0,30.0), retries=2, backoff=0.1, threadindex=None):
+    def __init__(self, api_token=None, api_key=None, context=None, url_prefix='', hostname='', timeout=(5.0,30.0), retries=3, backoff=0.1, threadindex=None):
         self._token = api_token
         self._key = api_key
         self._context = context
@@ -81,32 +81,34 @@ class RiskIQAPI():
             t1_start = perf_counter()
             if method == "DELETE":
                 req = requests.delete(url, auth=creds, params=params, json=payload)
-                return req
             else:
                 req = self._session.request(method, url, auth=creds, params=params, json=payload, timeout=self._timeout)
             t1_stop = perf_counter()
-
-            if thread_data != None:
-                logger.info('{0}-thr:{1} -queue#:{2} -url: {3} -method: {4} - statuscode: {45} -elapsed(sec):{6}'.format(self._context,thread_data.get('threadindex'), thread_data.get('qsize'), url, method, req.status_code, t1_stop-t1_start))
-            else:
-                logger.info('{0}-url: {1} -method: {2} - statuscode: {3} -elapsed(sec):{4}'.format(self._context, url, method, req.status_code, t1_stop-t1_start))
-
-            if 'Content-Type' in req.headers.keys() and req.headers.get('Content-Type') == 'text/xml':
-                parser = etree.XMLParser(recover=True)
-                tree = etree.parse(io.StringIO(req.text), parser)
-                tree.write('{0}/tmp/tmp.xml'.format(module_path), pretty_print=True, xml_declaration=True, encoding='utf-8')
-                with open('{0}/tmp/tmp.xml'.format(module_path)) as fd:
-                    temp_data = xmltodict.parse(fd.read(),attr_prefix='')
-                os.remove('{0}/tmp/tmp.xml'.format(module_path))
-                this_data = json.loads(json.dumps(temp_data))
-                return this_data
             
-            if type(req.json()) is not list and 'last' in req.json().keys():
-                self._markcount += req.json().get('numberOfElements')
-                logger.info('{0} Retrieved {1} of {2}'.format(self._context, self._markcount, req.json().get('totalElements')))
-                if req.json().get('last') == True:
-                    self._markcount = 0
+            if req.status_code != 200:
+                logger.info('{0}-url: {1} -method: {2} - statuscode: {3} -elapsed(sec):{4} \n -error: {5}'.format(self._context, url, method, req.status_code, t1_stop-t1_start, req.content))
+            elif req.status_code == 200:
+                if thread_data != None:
+                    logger.info('{0}-thr:{1} -queue#:{2} -url: {3} -method: {4} - statuscode: {45} -elapsed(sec):{6}'.format(self._context,thread_data.get('threadindex'), thread_data.get('qsize'), url, method, req.status_code, t1_stop-t1_start))
+                else:
+                    logger.info('{0}-url: {1} -method: {2} - statuscode: {3} -elapsed(sec):{4}'.format(self._context, url, method, req.status_code, t1_stop-t1_start))
+
+                if 'Content-Type' in req.headers.keys() and req.headers.get('Content-Type') == 'text/xml':
+                    parser = etree.XMLParser(recover=True)
+                    tree = etree.parse(io.StringIO(req.text), parser)
+                    tree.write('{0}/tmp/tmp.xml'.format(module_path), pretty_print=True, xml_declaration=True, encoding='utf-8')
+                    with open('{0}/tmp/tmp.xml'.format(module_path)) as fd:
+                        temp_data = xmltodict.parse(fd.read(),attr_prefix='')
+                    os.remove('{0}/tmp/tmp.xml'.format(module_path))
+                    this_data = json.loads(json.dumps(temp_data))
+                    return this_data
                 
+                if type(req.json()) is not list and 'last' in req.json().keys():
+                    self._markcount += req.json().get('numberOfElements')
+                    logger.info('{0} Retrieved {1} of {2}'.format(self._context, self._markcount, req.json().get('totalElements')))
+                    if req.json().get('last') == True:
+                        self._markcount = 0
+                    
             return req
         except Exception as e:
             t1_stop = perf_counter()

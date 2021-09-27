@@ -61,12 +61,30 @@ class Query(RiskIQAPI):
             this_v.assetType = value
         elif this_f.facet == 'brand':
             this_v.brand = value
+            if type(value) == list:
+                _tl = []
+                for _v in this_v.value:
+                    for k, v in _v.items():
+                        _tl.append(k)
+                this_v.value = _tl
+            else:
+                for k, v in this_v.value.items():
+                    this_v.value = k
         elif this_f.facet == 'confidence':
             this_v.confidence = value
         elif this_f.facet == 'domainExpiration':
             this_v.domainExpiration = value
         elif this_f.facet in ['org','organizatin']:
             this_v.org = value
+            if type(value) == list:
+                _tl = []
+                for _v in this_v.value:
+                    for k, v in _v.items():
+                        _tl.append(k)
+                this_v.value = _tl
+            else:
+                for k, v in this_v.value.items():
+                    this_v.value = k
         elif this_f.facet == 'portLastSeen':
             this_v.portLastSeen = value
         elif this_f.facet == 'portState':
@@ -81,6 +99,15 @@ class Query(RiskIQAPI):
             this_v.state = value
         elif this_f.facet == 'tag':
             this_v.tag = value
+            if type(value) == list:
+                _tl = []
+                for _v in this_v.value:
+                    for k, v in _v.items():
+                        _tl.append(k)
+                this_v.value = _tl
+            else:
+                for k, v in this_v.value.items():
+                    this_v.value = k
         elif this_f.facet == 'validationType':
             this_v.validationType = value
         else:
