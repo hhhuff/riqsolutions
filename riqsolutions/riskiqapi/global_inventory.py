@@ -275,7 +275,7 @@ class GlobalInventory(RiskIQAPI):
         full_response = {'DOMAIN':[],'HOST':[],'PAGE':[],'IP_BLOCK':[],'IP_ADDRESS':[],'CONTACT':[],'SSL_CERT':[],'AS':[]}
 
         while True:
-            more_flag = False
+            moreflag = False
             this_params = {
                 'name':asset_name,
                 'global':False,
@@ -807,7 +807,7 @@ def get_asset_dataset(self, this_dataset, asset_name=None, asset_type=None, rece
         'mark':'*'
     }
     r = self.get('assets/{0}/{1}'.format(_t.assetType.lower(), this_dataset), params=this_params)
-    return r
+    return r.json()
 
 
 def bundler(endpoint=None, payload=None, asset_type=None, bundle_size=10):
