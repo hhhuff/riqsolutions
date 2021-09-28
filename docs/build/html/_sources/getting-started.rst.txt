@@ -55,22 +55,32 @@ Or download the toolkit source: https://github.com/philcowger/riqsolutions/archi
 Usage
 -----
 
-Run the CLI
-^^^^^^^^^^^^^^^
-The toolkit provides a command line interface (CLI) to help with essential tasks including API authentication. To use it, run the riqsolutions module directly:
-
-.. code-block:: python
-
-    python3 -m riqsolutions --help
-
 
 Configure API access
 ^^^^^^^^^^^^^^^^^^^^^^^^
-Use the toolkit to configure API keys and store them on your local filesystem. This reduces the risk of checking in sensitive authentication keys.
+Use the toolkit to configure API keys and store them on your local filesystem. This reduces the risk of checking in sensitive authentication keys.  You will need your API Token, API key, and a name to use for credentials context.
+
+You can use the cli configure prompter to provide your credentials for a 'default' context:
+(This will prompt you for an api_token and api_key only.  The context will be 'DEFAULT'.)
 
 .. code-block:: python
 
     python3 -m riqsolutions configure
+
+
+Or you can supply your initial configuration credentials to the configure function directly:
+
+.. code-block:: python
+
+    python3 -m riqsolutions configure --api_token={your_api_token} --api_key={your_api_key} --context={your_context_name}
+
+
+To create additional credentials contexts for use with the library use the --update command with the configure function
+
+.. code-block:: python
+
+    python3 -m riqsolutions configure --api_token={your_api_token} --api_key={your_api_key} --context=roote --update
+
 
 Follow the prompts to provide your API credentials. By default, the toolkit writes the credentials to a file in your user's home directory. For details, see:
 
@@ -89,10 +99,10 @@ This example shows how to use toolkit after configuring your API credentials wit
     from riqsolutions.cli import configure_api
 
     gi = GlobalInventory()
-    configure_api(gi)
+    configure_api(gi, context={your_context_name})
 
     tags = gi.get_tags()
 
     for tag in tags:
-    print(tag['name'])
+        print(tag['name'])
 

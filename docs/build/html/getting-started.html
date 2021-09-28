@@ -15,7 +15,7 @@
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Globan Inventory Module" href="globalinventory.html" />
+    <link rel="next" title="Global Inventory" href="globalinventory.html" />
     <link rel="prev" title="RiskIQ Solutions API Python Library" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -74,17 +74,20 @@
 </section>
 <section id="usage">
 <h3>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h3>
-<section id="run-the-cli">
-<h4>Run the CLI<a class="headerlink" href="#run-the-cli" title="Permalink to this headline">¶</a></h4>
-<p>The toolkit provides a command line interface (CLI) to help with essential tasks including API authentication. To use it, run the riqsolutions module directly:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">riqsolutions</span> <span class="o">--</span><span class="n">help</span>
-</pre></div>
-</div>
-</section>
 <section id="configure-api-access">
 <h4>Configure API access<a class="headerlink" href="#configure-api-access" title="Permalink to this headline">¶</a></h4>
-<p>Use the toolkit to configure API keys and store them on your local filesystem. This reduces the risk of checking in sensitive authentication keys.</p>
+<p>Use the toolkit to configure API keys and store them on your local filesystem. This reduces the risk of checking in sensitive authentication keys.  You will need your API Token, API key, and a name to use for credentials context.</p>
+<p>You can use the cli configure prompter to provide your credentials for a ‘default’ context:
+(This will prompt you for an api_token and api_key only.  The context will be ‘DEFAULT’.)</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">riqsolutions</span> <span class="n">configure</span>
+</pre></div>
+</div>
+<p>Or you can supply your initial configuration credentials to the configure function directly:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">riqsolutions</span> <span class="n">configure</span> <span class="o">--</span><span class="n">api_token</span><span class="o">=</span><span class="p">{</span><span class="n">your_api_token</span><span class="p">}</span> <span class="o">--</span><span class="n">api_key</span><span class="o">=</span><span class="p">{</span><span class="n">your_api_key</span><span class="p">}</span> <span class="o">--</span><span class="n">context</span><span class="o">=</span><span class="p">{</span><span class="n">your_context_name</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>To create additional credentials contexts for use with the library use the –update command with the configure function</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">riqsolutions</span> <span class="n">configure</span> <span class="o">--</span><span class="n">api_token</span><span class="o">=</span><span class="p">{</span><span class="n">your_api_token</span><span class="p">}</span> <span class="o">--</span><span class="n">api_key</span><span class="o">=</span><span class="p">{</span><span class="n">your_api_key</span><span class="p">}</span> <span class="o">--</span><span class="n">context</span><span class="o">=</span><span class="n">roote</span> <span class="o">--</span><span class="n">update</span>
 </pre></div>
 </div>
 <p>Follow the prompts to provide your API credentials. By default, the toolkit writes the credentials to a file in your user’s home directory. For details, see:</p>
@@ -99,12 +102,12 @@
 <span class="kn">from</span> <span class="nn">riqsolutions.cli</span> <span class="kn">import</span> <span class="n">configure_api</span>
 
 <span class="n">gi</span> <span class="o">=</span> <span class="n">GlobalInventory</span><span class="p">()</span>
-<span class="n">configure_api</span><span class="p">(</span><span class="n">gi</span><span class="p">)</span>
+<span class="n">configure_api</span><span class="p">(</span><span class="n">gi</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="p">{</span><span class="n">your_context_name</span><span class="p">})</span>
 
 <span class="n">tags</span> <span class="o">=</span> <span class="n">gi</span><span class="o">.</span><span class="n">get_tags</span><span class="p">()</span>
 
 <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">tag</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">tag</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 </section>
@@ -135,7 +138,12 @@
 <li class="toctree-l2"><a class="reference internal" href="#riskiq-sa-toolkit">RiskIQ SA Toolkit</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="globalinventory.html">Globan Inventory Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="globalinventory.html">Global Inventory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="query.html">Query</a></li>
+<li class="toctree-l1"><a class="reference internal" href="facet.html">Facet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="comparator.html">Comparator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="value.html">Value</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workspace.html">Workspace</a></li>
 </ul>
 
 <div class="relations">
@@ -143,7 +151,7 @@
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="index.html" title="previous chapter">RiskIQ Solutions API Python Library</a></li>
-      <li>Next: <a href="globalinventory.html" title="next chapter">Globan Inventory Module</a></li>
+      <li>Next: <a href="globalinventory.html" title="next chapter">Global Inventory</a></li>
   </ul></li>
 </ul>
 </div>
