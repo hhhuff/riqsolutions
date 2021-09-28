@@ -37,7 +37,7 @@ logger.setLevel(logging.INFO)
 logger.addHandler(my_handler)
 
 class RiskIQAPI():
-    def __init__(self, api_token=None, api_key=None, context=None, url_prefix='', hostname='', retries=10, backoff=0.1, threadindex=None):
+    def __init__(self, api_token=None, api_key=None, context=None, url_prefix='', timeout=None, hostname='', retries=10, backoff=0.1, threadindex=None):
         self._token = api_token
         self._key = api_key
         self._context = context
