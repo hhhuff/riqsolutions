@@ -54,7 +54,6 @@ class Query(RiskIQAPI):
         this_c.comparator = comparator
 
         this_v = Value(self)
-        configure_api(this_v, context=self.get_context())
         if this_f.facet.lower() == 'alexabucket':
             this_v.alexaBucket = value
         elif this_f.facet.lower() in ['type','assettype']:
@@ -184,39 +183,6 @@ class Query(RiskIQAPI):
                     this_mark = this_data.get('mark')
                 else:
                     return {'results':full_response}
-
-    
-def check_values(self, facetType, value):
-    this_value = value
-    if facetType == 'tag':
-        this_list = self._tagList['tags']
-    elif facetType == 'brand':
-        this_list = self._brandList['brands']
-    elif facetType == 'org':
-        this_list = self._orgList['organizations']
-    
-    if facetType in ['tag','brand','org']:
-        if type(value) is list:
-            this_value = []
-            for v in value:
-                chk_flag = False
-                for t in this_list:
-                    if t['name'] == v:
-                        this_value.append(t['id'])
-                        chk_flag = True
-                if chk_flag == False:
-                    raise TypeError('{0} - is not a current {1} Name'.format(value, facetType))
-        else:
-            chk_flag = False
-            for t in this_list:
-                if t['name'] == value:
-                    this_value = t['id']
-                    chk_flag = True
-                    break
-            if chk_flag == False:
-                raise TypeError('{0} - is not a current {1} Name'.format(value, facetType))
-
-    return this_value
 
 
 def process_query_object(self):

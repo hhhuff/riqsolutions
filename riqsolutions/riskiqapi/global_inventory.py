@@ -703,7 +703,6 @@ class GlobalInventory(RiskIQAPI):
         :param failOnError: type bool, optional 
         """
         _a = Value(self)
-
         _a.action = action
 
         _aval = Value(self)
@@ -722,10 +721,37 @@ class GlobalInventory(RiskIQAPI):
             _uval.enterprise = update_value
         elif _uval.updateType == 'brand':
             _uval.brand = update_value
+            if type(update_value) == list:
+                _tl = []
+                for _v in _uval.value:
+                    for k, v in _v.items():
+                        _tl.append(k)
+                _uval.value = _tl
+            else:
+                for k, v in _uval.value.items():
+                    _uval.value = k
         elif _uval.updateType == 'organization':
             _uval.organization = update_value
+            if type(update_value) == list:
+                _tl = []
+                for _v in _uval.value:
+                    for k, v in _v.items():
+                        _tl.append(k)
+                _uval.value = _tl
+            else:
+                for k, v in _uval.value.items():
+                    _uval.value = k
         elif _uval.updateType == 'tag':
             _uval.tag = update_value
+            if type(update_value) == list:
+                _tl = []
+                for _v in _uval.value:
+                    for k, v in _v.items():
+                        _tl.append(k)
+                _uval.value = _tl
+            else:
+                for k, v in _uval.value.items():
+                    _uval.value = k
         else:
             _uval.value = update_value
         
