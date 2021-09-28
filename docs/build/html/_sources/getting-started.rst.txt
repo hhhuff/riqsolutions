@@ -43,7 +43,11 @@ We will use the standard Python package manager, pip, to install the toolkit int
 
 .. code-block:: python
 
-    python3 -m pip install git+ssh://git@github.com/philcowger/riqsolutions@main#egg=riqsolutions
+    # to install
+    pip install git+https://github.com/philcowger/riqsolutions.git
+
+    # to update
+    pip install --upgrade --force-reinstall git+https://github.com/philcowger/riqsolutions.git
 
 Or download the toolkit source: https://github.com/philcowger/riqsolutions/archive/refs/heads/master.zip and install from the local location
 
