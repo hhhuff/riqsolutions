@@ -16,10 +16,13 @@ import re
 from time import perf_counter
 import os.path
 
-_f = os.path.realpath(__file__).replace('riskiqapi.py','log/riqsolutions.log')
+_d = os.path.realpath(__file__).replace('riskiqapi.py','log')
+if os.path.exists(_d) == False:
+    os.makedirs(_d)
+_f = '{0}{1}'.format(_d,'/riqsolutions.log')
 if os.path.exists(_f) == False:
-    with open(_f, 'w+') as f:
-        f.write('RiskIQ Solutions API Library Activity Log')
+    f = open(_f, 'w+')
+    f.write('RiskIQ Solutions API Library Activity Log')
 
 log_formatter = logging.Formatter('%(asctime)s %(levelname)s - %(module)s:%(funcName)s(): %(message)s')
 my_handler = RotatingFileHandler(
