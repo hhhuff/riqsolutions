@@ -25,8 +25,6 @@ _DATETIMEFORMAT_ = '%Y-%m-%d %H:%M:%S'
 class Value(RiskIQAPI):
     """
     Class created to represent and manage all the differrent values and types being used with the RiskIQ Solutions Python API Library
-
-    ** This is an Internal class and not intended to be called by the user **
     """
     def __init__(self, gi_api=None, value=None):
         self._gi_api = gi_api
