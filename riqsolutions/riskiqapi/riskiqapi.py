@@ -16,6 +16,11 @@ import re
 from time import perf_counter
 import os.path
 
+_tmp = os.path.realpath(__file__).replace('riskiqapi.py','tmp')
+if os.path.exists(_tmp) == False:
+    os.makedirs(_tmp)
+
+
 _d = os.path.realpath(__file__).replace('riskiqapi.py','log')
 if os.path.exists(_d) == False:
     os.makedirs(_d)
@@ -92,17 +97,17 @@ class RiskIQAPI():
                 logger.info('{0}-url: {1} -method: {2} - statuscode: {3} -elapsed(sec):{4} \n -error: {5}'.format(self._context, url, method, req.status_code, t1_stop-t1_start, req.content))
             elif req.status_code == 200:
                 if thread_data != None:
-                    logger.info('{0}-thr:{1} -queue#:{2} -url: {3} -method: {4} - statuscode: {45} -elapsed(sec):{6}'.format(self._context,thread_data.get('threadindex'), thread_data.get('qsize'), url, method, req.status_code, t1_stop-t1_start))
+                    logger.info('{0}-thr:{1} -queue#:{2} -url: {3} -method: {4} - statuscode: {5} -elapsed(sec):{6}'.format(self._context,thread_data.get('threadindex'), thread_data.get('qsize'), url, method, req.status_code, t1_stop-t1_start))
                 else:
                     logger.info('{0}-url: {1} -method: {2} - statuscode: {3} -elapsed(sec):{4}'.format(self._context, url, method, req.status_code, t1_stop-t1_start))
 
                 if 'Content-Type' in req.headers.keys() and req.headers.get('Content-Type') == 'text/xml':
                     parser = etree.XMLParser(recover=True)
                     tree = etree.parse(io.StringIO(req.text), parser)
-                    tree.write('{0}/tmp/tmp.xml'.format(module_path), pretty_print=True, xml_declaration=True, encoding='utf-8')
-                    with open('{0}/tmp/tmp.xml'.format(module_path)) as fd:
+                    tree.write('{0}/tmp.xml'.format(_tmp), pretty_print=True, xml_declaration=True, encoding='utf-8')
+                    with open('{0}/tmp.xml'.format(_tmp)) as fd:
                         temp_data = xmltodict.parse(fd.read(),attr_prefix='')
-                    os.remove('{0}/tmp/tmp.xml'.format(module_path))
+                    os.remove('{0}/tmp.xml'.format(_tmp))
                     this_data = json.loads(json.dumps(temp_data))
                     return this_data
                 
