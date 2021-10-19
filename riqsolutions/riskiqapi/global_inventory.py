@@ -4,6 +4,7 @@ from .riskiqapi import RiskIQAPI
 from .workspace import Workspace
 from .values import Value
 from riqsolutions.cli import configure_api
+import os
 import json
 import threading
 from threading import Thread
@@ -128,7 +129,7 @@ class GlobalInventory(RiskIQAPI):
         r = self.get('assets/{}'.format(_t.assetType.lower()), params=this_params)
         return r.json()
 
-    def get_assets_bulk(self, asset_list:None, asset_type=None):
+    def get_assets_bulk(self, asset_list:None, asset_type=None, bundle_size=5, max_thread_count=(os.cpu_count()-1)):
         """
         Retrieve encrichment data for a list of assets.
 
@@ -136,6 +137,8 @@ class GlobalInventory(RiskIQAPI):
 
         :param asset_type: type str, required
         :param asset_list: type list, required
+        :param bundle_size: type int, optional (default: 5)
+        :param max_thread_count: type int, optional (default: cpu_count-1)
         """
         _al = Value(self)
         _al.listType = asset_list
@@ -144,15 +147,15 @@ class GlobalInventory(RiskIQAPI):
         _t.assetType = asset_type
 
         if len(_al.value) > 100:
-            full_payload = bundler(endpoint='assets/bulk', payload=_al.value, asset_type=_t.assetType, bundle_size=10)
+            full_payload = bundler(endpoint='assets/bulk', payload=_al.value, asset_type=_t.assetType, bundle_size=bundle_size)
             _results = []
             while True:
-                r = bulk_sequencer('assets/bulk', payload=full_payload, asset_type=_t.assetType, context=self.get_context(), max_thread_count=25)
+                r = bulk_sequencer('assets/bulk', payload=full_payload, asset_type=_t.assetType, context=self.get_context(), max_thread_count=max_thread_count)
                 if len(r.get('resultList')) > 0:
                     for h in r.get('resultList'):
                         _results.append(h)
                 if len(r.get('retryList')) > 0:
-                    full_payload = bundler(endpoint='assets/bulk', payload=r.get('retryList'), asset_type=_t.assetType, bundle_size=10)
+                    full_payload = bundler(endpoint='assets/bulk', payload=r.get('retryList'), asset_type=_t.assetType, bundle_size=bundle_size)
                 else:
                     break
             return _results
@@ -834,7 +837,7 @@ def get_asset_dataset(self, this_dataset, asset_name=None, asset_type=None, rece
     return r.json()
 
 
-def bundler(endpoint=None, payload=None, asset_type=None, bundle_size=10):
+def bundler(endpoint=None, payload=None, asset_type=None, bundle_size=None):
     if endpoint == 'assets/bulk':
         full_payload = []
         host_bundle = []
@@ -845,7 +848,7 @@ def bundler(endpoint=None, payload=None, asset_type=None, bundle_size=10):
                 "name": a,
                 "type": asset_type
             })
-            if int(len(host_bundle) % 10) == 0 or a ==payload[-1]:
+            if int(len(host_bundle) % bundle_size) == 0 or a ==payload[-1]:
                 full_payload.append(host_bundle)
                 host_bundle = []
 
@@ -863,7 +866,7 @@ def bulk_threader(i, _queue, total_size, context, _resultList, _retryList, endpo
 
             _queue.task_done()
 
-def bulk_sequencer(endpoint=None, payload=None, params=None, asset_type=None, context=None, max_thread_count=25):
+def bulk_sequencer(endpoint=None, payload=None, params=None, asset_type=None, context=None, max_thread_count=None):
     _resultList = []
     _retryList = []
     _queue = queue.Queue()
@@ -875,7 +878,6 @@ def bulk_sequencer(endpoint=None, payload=None, params=None, asset_type=None, co
         thread = threading.Thread(target=bulk_threader, args=(i, _queue, len(payload), context, _resultList, _retryList, endpoint))
         thread.setDaemon(True)
         thread.start()
-    host_bundle = []
     for index in range(len(payload)):
         _queue.put(payload[index])
     _queue.join()
