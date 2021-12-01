@@ -45,9 +45,12 @@ class GlobalInventory(RiskIQAPI):
         if query != None:
             _v.dictType = query
             this_payload = _v.dictType
-        elif savedSearchID != None:
+        else:
+            this_payload = None
+
+        if savedSearchID != None:
             _s.stringType = savedSearchID
-        elif savedSearchName != None:
+        if savedSearchName != None:
             _s.stringType = savedSearchName
 
         full_response = []
@@ -64,21 +67,27 @@ class GlobalInventory(RiskIQAPI):
                 this_params['savedSearchID'] = _s.value
             elif savedSearchName != None:
                 this_params['savedSearchName'] = _s.value
-            r = self.post('search', payload=this_payload, params=this_params)
+            if this_payload == None:
+                r = self.get('search', payload=this_payload, params=this_params)
+            else:
+                r = self.post('search', payload=this_payload, params=this_params)
             if type(r) == dict and 'error' in r.keys():
                 if count >= 5:
                     raise ValueError('GlobalInventory.inventory_search() failed too many times on the same mark bundle')
                 else:
                     count += 1
             else:
-                count = 0
-                this_data = r.json()
-                for c in this_data.get('content'):
-                    full_response.append(c)
-                if this_data.get('last') != True:
-                    this_mark = this_data.get('mark')
-                else:
-                    return {'results':full_response}
+                try:
+                    count = 0
+                    this_data = r.json()
+                    for c in this_data.get('content'):
+                        full_response.append(c)
+                    if this_data.get('last') != True:
+                        this_mark = this_data.get('mark')
+                    else:
+                        return {'results':full_response}
+                except Exception as e:
+                    return {'results':r.content}
 
 
     def get_asset_by_id(self, uuid: str=None, recent: bool=True):
@@ -102,7 +111,7 @@ class GlobalInventory(RiskIQAPI):
         r = self.get('assets/id/{}'.format(_v.value), params=this_params)
         return r.json()
 
-    def get_asset(self, asset_name=None, asset_type=None, recent=True, size=100):
+    def get_asset(self, asset_name=None, asset_type=None, recent=True, size=100, _global=False):
         """
         Retrieve enrichment data of a single asseet.
 
@@ -119,7 +128,7 @@ class GlobalInventory(RiskIQAPI):
         this_params = {
             'name':_an.value,
             'recent':recent,
-            'global':False,
+            'global':_global,
             'size':size
         }
 
